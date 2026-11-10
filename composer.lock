@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "11dc2beb9a7b0385f1b8d895065e2b7c",
+    "content-hash": "aaa5df00ab82170852eaa13ee987c657",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1261,6 +1261,52 @@
                 "source": "https://github.com/filamentphp/filament"
             },
             "time": "2026-10-12T16:39:25+00:00"
+        },
+        {
+            "name": "filament/spatie-laravel-translatable-plugin",
+            "version": "v3.3.57",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/filamentphp/spatie-laravel-translatable-plugin.git",
+                "reference": "5fe3203b7b419fee7c8688764e4d351dcde5c790"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/filamentphp/spatie-laravel-translatable-plugin/zipball/5fe3203b7b419fee7c8688764e4d351dcde5c790",
+                "reference": "5fe3203b7b419fee7c8688764e4d351dcde5c790",
+                "shasum": ""
+            },
+            "require": {
+                "filament/support": "self.version",
+                "illuminate/support": "^10.45|^11.0|^12.0|^13.0",
+                "php": "^8.1",
+                "spatie/laravel-translatable": "^6.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Filament\\SpatieLaravelTranslatablePluginServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Filament\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Filament support for `spatie/laravel-translatable`.",
+            "homepage": "https://github.com/filamentphp/filament",
+            "support": {
+                "issues": "https://github.com/filamentphp/filament/issues",
+                "source": "https://github.com/filamentphp/filament"
+            },
+            "abandoned": "lara-zeus/spatie-translatable",
+            "time": "2026-06-12T16:57:24+00:00"
         },
         {
             "name": "filament/support",
