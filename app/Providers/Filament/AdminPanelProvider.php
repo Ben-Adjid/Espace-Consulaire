@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Widgets\ConsulateStatsWidget;
+use App\Filament\Admin\Widgets\UpcomingAppointmentsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,7 +12,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
+use Filament\SpatieLaravelTranslatablePlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -25,18 +27,21 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('admin')
-            ->colors([
-                'primary' => Color::Amber,
-            ])
+            ->login()
+            ->brandName('Consulats — Administration (démo)')
+            ->colors(['primary' => Color::Indigo])
+            ->navigationGroups(['Contenu', 'Rendez-vous', 'Administration'])
+            ->plugin(
+                SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ar'])
+            )
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                ConsulateStatsWidget::class,
+                UpcomingAppointmentsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
