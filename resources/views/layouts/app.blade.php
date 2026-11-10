@@ -86,7 +86,7 @@
                     {{-- Menu mobile sans JavaScript --}}
                     <details class="relative lg:hidden">
                         <summary class="flex size-10 cursor-pointer list-none items-center justify-center rounded-md border border-slate-300" aria-label="{{ __('Menu') }}">
-                            <x-icon name="menu" class="size-6" />
+                            <x-ico name="menu" class="size-6" />
                         </summary>
                         <div class="absolute end-0 top-12 z-40 w-60 rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
                             @foreach ($nav as [$routeName, $label])
@@ -144,7 +144,7 @@
            target="_blank" rel="noopener noreferrer"
            class="fixed bottom-4 end-4 z-40 flex items-center gap-2 rounded-full bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-green-700"
            aria-label="WhatsApp">
-            <x-icon name="chat" class="size-5" /> <span class="hidden sm:inline">WhatsApp</span>
+            <x-ico name="chat" class="size-5" /> <span class="hidden sm:inline">WhatsApp</span>
         </a>
     @endif
 </body>

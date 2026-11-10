@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\ConsulateContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +15,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Une seule instance par requête : le middleware et le contrôleur doivent voir le même consulat.
+        $this->app->singleton(ConsulateContext::class);
     }
 
     public function boot(): void

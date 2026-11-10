@@ -6,7 +6,7 @@
 <section class="mx-auto max-w-2xl px-4 py-12">
     <div class="card overflow-hidden">
         <div class="bg-green-600 p-6 text-center text-white">
-            <x-icon name="check" class="mx-auto size-12" />
+            <x-ico name="check" class="mx-auto size-12" />
             <h1 class="mt-2 text-2xl font-bold">{{ __('Votre demande est enregistrée') }}</h1>
         </div>
         <div class="space-y-5 p-6">

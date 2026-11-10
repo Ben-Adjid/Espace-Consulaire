@@ -1,66 +1,143 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Plateforme multi-consulats — DÉMO NON OFFICIELLE
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> ⚠ **Démo / Maquette non officielle.** Données fictives (adresses, téléphones, frais, délais, personnes).
+> Aucun logo ni armoirie officiels. Ce projet n'est ni édité ni validé par un État ou un consulat.
 
-## About Laravel
+Une seule base de code et une seule base MySQL servent plusieurs consulats africains.
+Démos incluses : **Consulat du Tchad au Sénégal** et **Consulat du Cameroun au Sénégal**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Voir [PLAN.md](PLAN.md) (architecture et schéma), [DECISIONS.md](DECISIONS.md) (choix faits en autonomie),
+[docs/ROADMAP_V2.md](docs/ROADMAP_V2.md) et [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Laravel 12 · PHP 8.2+ · MySQL 8 · Filament 3 · Blade + Livewire 3 · Tailwind CSS 4 (Vite) ·
+spatie/laravel-translatable (FR / EN / AR) · spatie/laravel-permission · Leaflet / OpenStreetMap · PHPUnit.
 
-## Learning Laravel
+## Prérequis
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.2+ avec : `pdo_mysql`, `mbstring`, `intl`, `zip`, `gd`, `fileinfo`, `exif`, `openssl`, `curl`
+- Composer 2, Node.js 20+ et npm
+- MySQL 8.0
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Sous Windows, `intl` et `exif` sont souvent désactivés dans `php.ini` : décommentez `extension=intl` et `extension=exif`,
+ou, sans toucher à la configuration système, utilisez le dossier `.phpini/` (voir ci-dessous).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installation
 
-## Laravel Sponsors
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Configurer MySQL
 
-### Premium Partners
+Créez la base (une seule fois) :
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```sql
+CREATE DATABASE consulat_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-## Contributing
+Puis renseignez `.env` :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306          # adaptez si votre MySQL écoute sur un autre port
+DB_DATABASE=consulat_platform
+DB_USERNAME=root
+DB_PASSWORD=votre_mot_de_passe
+```
 
-## Code of Conduct
+### Migrations et données de démo
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan migrate --seed
+php artisan storage:link
+```
 
-## Security Vulnerabilities
+Le seeder crée les rôles, les deux consulats (services, actualités, FAQ, pages légales, horaires,
+créneaux, quelques rendez-vous et messages) et les comptes de démo.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Lancer le projet
 
-## License
+Deux terminaux :
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan serve        # http://127.0.0.1:8000
+npm run dev              # Vite (rechargement des assets)
+```
+
+Pour une version compilée sans `npm run dev` : `npm run build`.
+
+### Sous Windows : activer `intl` sans modifier `php.ini`
+
+Le dossier `.phpini/` (ignoré par Git) contient un fichier qui active les extensions. Dans PowerShell :
+
+```powershell
+$env:PHP_INI_SCAN_DIR = "$PWD\.phpini"
+php -m | Select-String intl
+```
+
+## URLs à ouvrir
+
+| Page | URL |
+|---|---|
+| Choix du consulat | http://127.0.0.1:8000/ |
+| Consulat du Tchad (FR) | http://127.0.0.1:8000/tchad-senegal |
+| Consulat du Tchad (EN / AR) | http://127.0.0.1:8000/tchad-senegal?lang=en · `?lang=ar` (RTL) |
+| Consulat du Cameroun | http://127.0.0.1:8000/cameroun-senegal |
+| Prise de rendez-vous | http://127.0.0.1:8000/tchad-senegal/appointment |
+| Administration | http://127.0.0.1:8000/admin |
+| Sitemap / robots | http://127.0.0.1:8000/sitemap.xml · `/robots.txt` |
+
+## Comptes de démo
+
+Mot de passe commun : **`Demo#Consulat2026`** (modifiable via `DEMO_PASSWORD` dans `.env`, avant le seed).
+
+| Rôle | Email | Accès |
+|---|---|---|
+| super_admin | `superadmin@demo.test` | tous les consulats, création de consulats |
+| consulate_admin (Tchad) | `admin.tchad@demo.test` | contenus, rendez-vous, messages, utilisateurs et fiche du Tchad |
+| staff (Tchad) | `staff.tchad@demo.test` | rendez-vous et messages, lecture des contenus |
+| consulate_admin (Cameroun) | `admin.cameroun@demo.test` | idem pour le Cameroun |
+| staff (Cameroun) | `staff.cameroun@demo.test` | idem pour le Cameroun |
+
+Vérifier l'isolation : connectez-vous avec `admin.tchad@demo.test` : vous ne voyez que les données du Tchad.
+
+## Tests
+
+```bash
+php artisan test
+```
+
+Les tests utilisent SQLite en mémoire (configuré dans `phpunit.xml`). Ils couvrent : capacité des créneaux,
+refus d'une double réservation, isolation multi-consulats (admin et pages publiques), anti-spam du formulaire de contact.
+
+## Fonctionnement multi-consulats
+
+- Les pages publiques sont sous `/{slug}` ; le middleware `consulate` charge le consulat, la langue et le thème.
+- Dans Filament, le global scope `ConsulateScope` limite chaque utilisateur à son consulat ; le super_admin voit tout.
+  Les policies ajoutent une seconde vérification.
+- Les couleurs du consulat sont injectées en variables CSS (`--brand`, `--brand-2`, `--brand-3`) après validation.
+
+## Sécurité
+
+- Formulaires : Form Requests, protection CSRF, échappement Blade (le texte saisi est affiché en texte brut).
+- Anti-spam : honeypot + horodatage chiffré + rate limiting (contact : 5/min, rendez-vous : 10/min par IP).
+- Anti double réservation : transaction + verrou `lockForUpdate` sur le créneau + recomptage des places.
+- En-têtes : `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
+- Aucun secret dans le code : tout passe par `.env`.
+
+## Déploiement
+
+Voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
+
+## Limites connues
+
+- Pas de véritable envoi d'email par défaut (`MAIL_MAILER=log`, les messages sont dans `storage/logs`).
+- Créneaux récurrents hebdomadaires uniquement ; pas encore de fermetures exceptionnelles par date.
+- Les rendez-vous ne peuvent pas être modifiés par le public (annulation via l'admin ou le contact).
+- Pas de paiement ni de pré-demande en ligne : voir [docs/ROADMAP_V2.md](docs/ROADMAP_V2.md).

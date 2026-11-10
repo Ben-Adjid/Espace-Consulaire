@@ -19,3 +19,13 @@ Décisions prises en autonomie pendant le développement.
 | 13 | Anti double réservation : transaction + `lockForUpdate` sur le créneau + recomptage + refus d'un même email sur un même créneau/jour | Garantit la capacité même en cas de requêtes concurrentes. |
 | 14 | Tests en PHPUnit (fourni par Laravel) | Zéro dépendance supplémentaire. |
 | 15 | Fonctionnalités V2 : drapeaux `config/features.php` + contrats PHP + `docs/ROADMAP_V2.md`, sans implémentation | Demandé : « structure sans tout implémenter ». |
+
+## Décisions ajoutées en fin de développement
+
+| # | Décision | Raison |
+|---|---|---|
+| 16 | Consulat courant enregistré en **singleton** (`ConsulateContext`) | Sans cela, le middleware et le contrôleur recevaient deux instances différentes : toutes les pages renvoyaient 404. |
+| 17 | Disponibilité calculée avec `whereDate` et non `whereBetween` | Comparaison portable : SQLite stocke les dates avec heure, MySQL non. Le test de capacité l'a révélé. |
+| 18 | Le scope multi-consulats n'agit que dans le panneau Filament | Décision 9 confirmée ; les tests simulent le panneau courant pour vérifier l'isolation admin. |
+| 19 | Vérification locale sur **SQLite** (tests) ; MySQL non vérifié de bout en bout | Le MySQL local (port 3307) n'accepte pas le compte root sans mot de passe connu. Les migrations sont standards, mais à rejouer sur MySQL avant mise en production. |
+| 20 | Commits signés `Co-Authored-By` Sonnet 5.5 jusqu'à l'étape site public, puis Haiku 5.5 | Consigne d'attribution reçue en cours de session. |

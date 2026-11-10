@@ -50,7 +50,9 @@ class AvailabilityService
 
         return Appointment::withoutGlobalScopes()
             ->whereIn('time_slot_id', $slotIds)
-            ->whereBetween('appointment_date', [$from->toDateString(), $to->toDateString()])
+            // whereDate : comparaison de dates portable (MySQL DATE, SQLite texte horodaté).
+            ->whereDate('appointment_date', '>=', $from->toDateString())
+            ->whereDate('appointment_date', '<=', $to->toDateString())
             ->whereIn('status', AppointmentStatus::occupying())
             ->selectRaw('time_slot_id, appointment_date, COUNT(*) as total')
             ->groupBy('time_slot_id', 'appointment_date')

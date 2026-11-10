@@ -57,17 +57,17 @@
 
     <aside class="space-y-4 md:col-span-2">
         <div class="card space-y-4 p-5 text-sm">
-            <div class="flex gap-3"><x-icon name="pin" class="size-5 shrink-0 text-brand" /><span>{{ $consulate->address }}</span></div>
-            @if ($consulate->phone) <div class="flex gap-3"><x-icon name="phone" class="size-5 shrink-0 text-brand" /><bdi dir="ltr">{{ $consulate->phone }}</bdi></div> @endif
-            @if ($consulate->email) <div class="flex gap-3"><x-icon name="mail" class="size-5 shrink-0 text-brand" /><a class="text-brand hover:underline" href="mailto:{{ $consulate->email }}">{{ $consulate->email }}</a></div> @endif
+            <div class="flex gap-3"><x-ico name="pin" class="size-5 shrink-0 text-brand" /><span>{{ $consulate->address }}</span></div>
+            @if ($consulate->phone) <div class="flex gap-3"><x-ico name="phone" class="size-5 shrink-0 text-brand" /><bdi dir="ltr">{{ $consulate->phone }}</bdi></div> @endif
+            @if ($consulate->email) <div class="flex gap-3"><x-ico name="mail" class="size-5 shrink-0 text-brand" /><a class="text-brand hover:underline" href="mailto:{{ $consulate->email }}">{{ $consulate->email }}</a></div> @endif
             <div class="flex gap-3">
-                <x-icon name="clock" class="size-5 shrink-0 text-brand" />
+                <x-ico name="clock" class="size-5 shrink-0 text-brand" />
                 <ul>@foreach (preg_split('/\R/', trim((string) $consulate->opening_hours)) as $line) @if (trim($line) !== '') <li>{{ trim($line) }}</li> @endif @endforeach</ul>
             </div>
         </div>
         @if ($consulate->whatsappNumber())
             <a target="_blank" rel="noopener noreferrer" href="https://wa.me/{{ $consulate->whatsappNumber() }}?text={{ rawurlencode(__('Bonjour, j’ai une question concernant vos services consulaires.')) }}"
-               class="btn w-full bg-green-600 py-3 text-white hover:bg-green-700"><x-icon name="chat" class="size-5" /> {{ __('Écrire sur WhatsApp') }}</a>
+               class="btn w-full bg-green-600 py-3 text-white hover:bg-green-700"><x-ico name="chat" class="size-5" /> {{ __('Écrire sur WhatsApp') }}</a>
         @endif
     </aside>
 </div>

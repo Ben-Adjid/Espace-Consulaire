@@ -14,7 +14,7 @@
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($services as $service)
             <article class="card flex flex-col p-6">
-                <span class="mb-4 flex size-12 items-center justify-center rounded-full bg-brand/10 text-brand"><x-icon :name="$service->icon" /></span>
+                <span class="mb-4 flex size-12 items-center justify-center rounded-full bg-brand/10 text-brand"><x-ico :name="$service->icon" /></span>
                 <h2 class="text-lg font-bold text-slate-900">{{ $service->name }}</h2>
                 <p class="mt-2 flex-1 text-sm text-slate-600">{{ $service->summary }}</p>
                 <dl class="mt-4 grid grid-cols-2 gap-2 text-xs">

@@ -17,7 +17,7 @@
             @endif
             <div class="mt-7 flex flex-wrap gap-3">
                 <a href="{{ route('appointment.create') }}" class="btn-accent px-6 py-3 text-base">
-                    <x-icon name="calendar" class="size-5" /> {{ __('Prendre rendez-vous') }}
+                    <x-ico name="calendar" class="size-5" /> {{ __('Prendre rendez-vous') }}
                 </a>
                 <a href="{{ route('services.index') }}" class="btn border border-white/60 px-6 py-3 text-base text-white hover:bg-white/10">
                     {{ __('Nos services') }}
@@ -39,7 +39,7 @@
         @foreach ($services->take(8) as $service)
             <a href="{{ route('services.show', $service->slug) }}" class="card group flex flex-col items-center gap-3 p-5 text-center transition hover:-translate-y-0.5 hover:border-brand hover:shadow-md">
                 <span class="flex size-12 items-center justify-center rounded-full bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white">
-                    <x-icon :name="$service->icon" class="size-6" />
+                    <x-ico :name="$service->icon" class="size-6" />
                 </span>
                 <span class="text-sm font-semibold text-slate-800">{{ $service->name }}</span>
             </a>
@@ -77,11 +77,11 @@
     <div class="grid gap-6 md:grid-cols-2">
         <div class="card space-y-5 p-6">
             <div class="flex gap-3">
-                <x-icon name="pin" class="mt-0.5 size-6 shrink-0 text-brand" />
+                <x-ico name="pin" class="mt-0.5 size-6 shrink-0 text-brand" />
                 <div><h3 class="font-semibold">{{ __('Adresse') }}</h3><p class="text-slate-600">{{ $consulate->address }}</p></div>
             </div>
             <div class="flex gap-3">
-                <x-icon name="clock" class="mt-0.5 size-6 shrink-0 text-brand" />
+                <x-ico name="clock" class="mt-0.5 size-6 shrink-0 text-brand" />
                 <div>
                     <h3 class="font-semibold">{{ __('Horaires d’ouverture') }}</h3>
                     <ul class="text-slate-600">
@@ -92,7 +92,7 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <x-icon name="phone" class="mt-0.5 size-6 shrink-0 text-brand" />
+                <x-ico name="phone" class="mt-0.5 size-6 shrink-0 text-brand" />
                 <div>
                     <h3 class="font-semibold">{{ __('Contacts') }}</h3>
                     @if ($consulate->phone) <p class="text-slate-600"><bdi dir="ltr">{{ $consulate->phone }}</bdi></p> @endif

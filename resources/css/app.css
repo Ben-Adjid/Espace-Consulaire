@@ -23,18 +23,40 @@
     :focus-visible { outline: 3px solid var(--brand-2); outline-offset: 2px; }
 }
 
-@layer components {
-    .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition cursor-pointer; }
-    .btn-primary { @apply btn bg-brand text-white hover:brightness-110; }
-    .btn-accent { @apply btn bg-brand-2 text-slate-900 hover:brightness-95; }
-    .btn-outline { @apply btn border border-brand text-brand hover:bg-brand hover:text-white; }
-    .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
-    .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-brand focus:ring-2 focus:ring-brand/30; }
-    .label { @apply mb-1 block text-sm font-medium text-slate-700; }
-    .field-error { @apply mt-1 text-sm text-red-600; }
-    .section-title { @apply text-2xl font-bold text-brand sm:text-3xl; }
-    /* Piège à robots : hors écran, invisible pour les humains et lecteurs d'écran */
-    .hp { position: absolute; inset-inline-start: -10000px; width: 1px; height: 1px; overflow: hidden; }
+@utility btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition;
+}
+@utility btn-primary {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110;
+}
+@utility btn-accent {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-2 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:brightness-95;
+}
+@utility btn-outline {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-brand px-5 py-2.5 text-sm font-semibold text-brand transition hover:bg-brand hover:text-white;
+}
+@utility card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+}
+@utility input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-brand focus:ring-2 focus:ring-brand/30;
+}
+@utility label {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+}
+@utility field-error {
+    @apply mt-1 text-sm text-red-600;
+}
+@utility section-title {
+    @apply text-2xl font-bold text-brand sm:text-3xl;
+}
+/* Piège à robots : hors écran, invisible pour les humains et lecteurs d'écran */
+@utility hp {
+    position: absolute;
+    inset-inline-start: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
 }
 
 /* Carte Leaflet */

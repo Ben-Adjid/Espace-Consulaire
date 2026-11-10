@@ -11,7 +11,7 @@
 </section>
 <section class="mx-auto max-w-4xl px-4 py-10">
     <div class="relative mb-6">
-        <x-icon name="search" class="pointer-events-none absolute start-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+        <x-ico name="search" class="pointer-events-none absolute start-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
         <input id="faq-search" type="search" class="input ps-10" placeholder="{{ __('Rechercher une question…') }}" aria-label="{{ __('Rechercher une question…') }}" autocomplete="off">
     </div>
 
@@ -20,7 +20,7 @@
             <details data-faq-item class="card group p-0">
                 <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-4 font-semibold text-slate-900">
                     <span>{{ $faq->question }}</span>
-                    <x-icon name="chevron" class="size-5 shrink-0 text-brand transition group-open:rotate-180" />
+                    <x-ico name="chevron" class="size-5 shrink-0 text-brand transition group-open:rotate-180" />
                 </summary>
                 <div class="border-t border-slate-100 p-4 text-slate-700"><x-prose :text="$faq->answer" class="mb-0" /></div>
             </details>

@@ -9,7 +9,7 @@
         <nav class="mb-3 text-sm text-white/80" aria-label="{{ __('Fil d’Ariane') }}">
             <a class="hover:underline" href="{{ route('services.index') }}">{{ __('Services consulaires') }}</a> <span aria-hidden="true">/</span> {{ $service->name }}
         </nav>
-        <h1 class="flex items-center gap-3 text-3xl font-bold"><x-icon :name="$service->icon" class="size-9" /> {{ $service->name }}</h1>
+        <h1 class="flex items-center gap-3 text-3xl font-bold"><x-ico :name="$service->icon" class="size-9" /> {{ $service->name }}</h1>
         <p class="mt-3 max-w-2xl text-white/90">{{ $service->summary }}</p>
     </div>
 </section>
@@ -48,7 +48,7 @@
             <p class="text-xs text-slate-400">{{ __('Montants et délais fictifs (démo).') }}</p>
             @if ($service->allow_appointment)
                 <a href="{{ route('appointment.create', ['service' => $service->slug]) }}" class="btn-accent w-full py-3">
-                    <x-icon name="calendar" class="size-5" /> {{ __('Prendre rendez-vous') }}
+                    <x-ico name="calendar" class="size-5" /> {{ __('Prendre rendez-vous') }}
                 </a>
             @endif
         </div>
