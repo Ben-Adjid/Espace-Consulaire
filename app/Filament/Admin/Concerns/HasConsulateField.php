@@ -14,7 +14,10 @@ trait HasConsulateField
             ->label('Consulat')
             ->options(fn () => Consulate::query()->orderBy('slug')->get()
                 ->mapWithKeys(fn (Consulate $c) => [$c->id => $c->getTranslation('name', 'fr')])->all())
-            ->required()
+            // Obligatoire seulement pour le super_admin : pour les autres, le champ est masqué
+            // et Filament validerait sinon une valeur absente. Le consulat est alors fixé
+            // automatiquement par le trait BelongsToConsulate.
+            ->required(fn () => auth()->user()?->isSuperAdmin() ?? false)
             ->searchable()
             ->visible(fn () => auth()->user()?->isSuperAdmin());
     }

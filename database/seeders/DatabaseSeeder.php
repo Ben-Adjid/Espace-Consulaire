@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             ConsulateSeeder::class,   // Tchad + Cameroun (contenus, créneaux, utilisateurs)
             SuperAdminSeeder::class,
+            FeatureBacklogSeeder::class,
         ]);
     }
 }
