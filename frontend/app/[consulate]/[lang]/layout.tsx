@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import HtmlAttributes from '@/components/HtmlAttributes';
-import DemoBanner from '@/components/DemoBanner';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import { dirOf, t } from '@/lib/i18n';
@@ -49,7 +48,6 @@ export default async function ConsulateLayout({ children, params }: { children: 
       <a href="#main" className="hp focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-50 focus:rounded focus:bg-white focus:p-2">
         {t(lang, 'skip')}
       </a>
-      <DemoBanner lang={lang} />
       <SiteHeader consulate={consulate} lang={lang} base={base} />
       <main id="main" className="flex-1">{children}</main>
       <SiteFooter consulate={consulate} lang={lang} base={base} pages={pages} />

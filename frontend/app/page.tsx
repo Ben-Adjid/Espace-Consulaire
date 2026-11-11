@@ -25,9 +25,6 @@ export default async function PlatformHome() {
 
   return (
     <main className="flex flex-1 flex-col bg-[#f7f8f5] text-slate-900">
-      <div role="note" className="bg-[#f3c969] px-4 py-2 text-center text-xs font-medium text-slate-900 sm:text-sm">
-        Démonstration non officielle · Données fictives, sans logo officiel
-      </div>
 
       <header className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">

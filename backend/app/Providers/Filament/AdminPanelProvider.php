@@ -13,6 +13,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationItem;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
@@ -59,6 +60,13 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Consulats — Administration (démo)')
             ->colors(['primary' => Color::Indigo])
             ->navigationGroups(['Contenu', 'Rendez-vous', 'Administration'])
+            ->navigationItems([
+                NavigationItem::make('Retour au site public')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->url(fn () => static::publicSiteUrl())
+                    ->openUrlInNewTab()
+                    ->sort(100),
+            ])
             ->plugin(
                 SpatieLaravelTranslatablePlugin::make()->defaultLocales(['fr', 'en', 'ar'])
             )

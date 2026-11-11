@@ -71,6 +71,12 @@ export default function SiteHeader({ consulate, lang, base }: Omit<Props, 'curre
               );
             })}
           </div>
+          <Link href="/" className="hidden whitespace-nowrap text-xs font-semibold text-slate-600 hover:underline lg:inline" title={t(lang, 'other_consulates')}>
+            {t(lang, 'choose_consulate')}
+          </Link>
+          <a href={process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://127.0.0.1:8000/admin'} target="_blank" rel="noopener noreferrer" className="hidden whitespace-nowrap text-xs font-semibold text-slate-600 hover:underline xl:inline">
+            {t(lang, 'admin_space')}
+          </a>
           <Link href={`${base}/appointment`} className="btn-accent hidden px-4 py-2 text-sm sm:inline-flex">
             {t(lang, 'book')}
           </Link>
