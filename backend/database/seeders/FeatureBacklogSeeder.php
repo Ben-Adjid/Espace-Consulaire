@@ -11,10 +11,15 @@ class FeatureBacklogSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->items() as $item) {
-            FeatureBacklog::updateOrCreate(['title' => $item[0]], [
-                'description' => $item[1], 'category' => $item[2], 'priority' => $item[3],
-                'status' => 'idee', 'effort' => $item[4],
+            // Le statut n'est fixé qu'à la création : une relance ne remet jamais un élément à « idée ».
+            $row = FeatureBacklog::firstOrNew(['title' => $item[0]]);
+            $row->fill([
+                'description' => $item[1], 'category' => $item[2], 'priority' => $item[3], 'effort' => $item[4],
             ]);
+            if (! $row->exists) {
+                $row->status = 'idee';
+            }
+            $row->save();
         }
     }
 

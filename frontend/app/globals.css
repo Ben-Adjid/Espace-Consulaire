@@ -1,26 +1,34 @@
 @import "tailwindcss";
 
+/* Couleurs du consulat : injectées par le layout (style inline sur le conteneur). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand: #1d4ed8;
+  --brand-2: #facc15;
+  --brand-3: #dc2626;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Tahoma, "Noto Sans Arabic", "Noto Sans", Arial, sans-serif;
   }
+  :focus-visible { outline: 3px solid var(--brand-2); outline-offset: 2px; }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn { @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn text-white hover:brightness-110; background: var(--brand); }
+  .btn-accent { @apply btn text-slate-900 hover:brightness-95; background: var(--brand-2); }
+  .btn-outline { @apply btn border text-[var(--brand)] hover:text-white; border-color: var(--brand); }
+  .btn-outline:hover { background: var(--brand); }
+  .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm; }
+  .input:focus { border-color: var(--brand); outline: 2px solid color-mix(in srgb, var(--brand) 35%, transparent); }
+  .label { @apply mb-1 block text-sm font-medium text-slate-700; }
+  .section-title { @apply text-2xl font-bold sm:text-3xl; color: var(--brand); }
+  .text-brand { color: var(--brand); }
+  .bg-brand { background: var(--brand); }
+  /* Piège à robots : hors écran, invisible pour les humains et les lecteurs d'écran */
+  .hp { position: absolute; inset-inline-start: -10000px; width: 1px; height: 1px; overflow: hidden; }
 }

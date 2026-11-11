@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use RuntimeException;
 
-/** Échec métier d'une réservation. `translationKey` est la clé de message affichée au visiteur. */
+/** Échec métier d'une réservation. `translationKey` est le message (clé de traduction) renvoyé au visiteur. */
 class BookingException extends RuntimeException
 {
     public function __construct(public readonly string $translationKey)
@@ -25,5 +25,15 @@ class BookingException extends RuntimeException
     public static function invalid(): self
     {
         return new self('Ce créneau n’est pas disponible pour le service ou la date choisis.');
+    }
+
+    public static function consentRequired(): self
+    {
+        return new self('Veuillez accepter le traitement de vos données pour continuer.');
+    }
+
+    public static function notCancellable(): self
+    {
+        return new self('Ce rendez-vous ne peut plus être annulé en ligne. Contactez le consulat.');
     }
 }

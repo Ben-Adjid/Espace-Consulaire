@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Widgets\ConsulateStatsWidget;
 use App\Filament\Admin\Widgets\UpcomingAppointmentsWidget;
+use App\Filament\Admin\Widgets\AppointmentsByServiceChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -42,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 ConsulateStatsWidget::class,
                 UpcomingAppointmentsWidget::class,
+                AppointmentsByServiceChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\ClosedDate;
 use App\Models\Consulate;
 use App\Models\Service;
 use App\Models\TimeSlot;
@@ -13,7 +14,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Calcule les jours et créneaux réservables d'un service :
- * créneau hebdomadaire actif − rendez-vous déjà pris (capacité).
+ * créneau hebdomadaire actif − rendez-vous déjà pris (capacité), hors jours fermés.
  */
 class AvailabilityService
 {
@@ -32,7 +33,15 @@ class AvailabilityService
         return $date->betweenIncluded($this->firstBookableDate(), $this->lastBookableDate());
     }
 
-    /** Créneaux actifs du consulat applicables à ce service (spécifiques ou « tous services »). */
+    public function isClosed(Consulate $consulate, CarbonInterface $date): bool
+    {
+        return ClosedDate::withoutGlobalScopes()
+            ->where('consulate_id', $consulate->id)
+            ->whereDate('date', $date->toDateString())
+            ->exists();
+    }
+
+    /** Créneaux actifs applicables à ce service (spécifiques ou « tous services »). */
     private function slotsQuery(Consulate $consulate, Service $service)
     {
         return TimeSlot::withoutGlobalScopes()
@@ -50,7 +59,7 @@ class AvailabilityService
 
         return Appointment::withoutGlobalScopes()
             ->whereIn('time_slot_id', $slotIds)
-            // whereDate : comparaison de dates portable (MySQL DATE, SQLite texte horodaté).
+            // whereDate : comparaison portable (MySQL DATE, SQLite texte horodaté).
             ->whereDate('appointment_date', '>=', $from->toDateString())
             ->whereDate('appointment_date', '<=', $to->toDateString())
             ->whereIn('status', AppointmentStatus::occupying())
@@ -74,9 +83,15 @@ class AvailabilityService
         $to = $this->lastBookableDate();
         $taken = $this->taken($slots->pluck('id'), $from, $to);
         $byWeekday = $slots->groupBy('weekday');
+        $closed = ClosedDate::withoutGlobalScopes()->where('consulate_id', $consulate->id)
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->pluck('date')->map(fn ($d) => Carbon::parse($d)->toDateString())->all();
 
         $dates = [];
         for ($d = $from->copy(); $d->lte($to); $d->addDay()) {
+            if (in_array($d->toDateString(), $closed, true)) {
+                continue;
+            }
             foreach ($byWeekday->get($d->dayOfWeek, collect()) as $slot) {
                 $key = $slot->id.'|'.$d->toDateString();
                 if ($slot->capacity - ($taken[$key] ?? 0) > 0) {
@@ -96,7 +111,7 @@ class AvailabilityService
      */
     public function slotsFor(Consulate $consulate, Service $service, CarbonInterface $date): Collection
     {
-        if (! $this->isWithinWindow($date)) {
+        if (! $this->isWithinWindow($date) || $this->isClosed($consulate, $date)) {
             return collect();
         }
 

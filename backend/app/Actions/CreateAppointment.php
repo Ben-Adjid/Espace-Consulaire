@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Mail;
  * Crée un rendez-vous en garantissant l'absence de double réservation.
  *
  * Dans une transaction : verrou (SELECT … FOR UPDATE) sur le créneau,
- * recomptage des places, refus si complet ou si le même email réserve déjà ce créneau.
+ * recomptage des places, refus si complet, si le même email réserve déjà ce créneau,
+ * ou si le jour est fermé. Le consentement RGPD est obligatoire.
  */
 class CreateAppointment
 {
@@ -28,20 +29,24 @@ class CreateAppointment
     }
 
     /**
-     * @param  array{full_name:string,email:string,phone:string,notes?:?string}  $data
+     * @param  array{full_name:string,email:string,phone:string,notes?:?string,consent:bool}  $data
      *
      * @throws BookingException
      */
     public function execute(Consulate $consulate, Service $service, TimeSlot $slot, CarbonInterface $date, array $data, string $locale = 'fr'): Appointment
     {
-        // Cohérence : le service et le créneau appartiennent bien à ce consulat.
+        if (empty($data['consent'])) {
+            throw BookingException::consentRequired();
+        }
+
         $valid = $service->consulate_id === $consulate->id
             && $slot->consulate_id === $consulate->id
             && $service->is_active && $service->allow_appointment
             && $slot->is_active
             && ($slot->service_id === null || $slot->service_id === $service->id)
             && $slot->weekday === $date->dayOfWeek
-            && $this->availability->isWithinWindow($date);
+            && $this->availability->isWithinWindow($date)
+            && ! $this->availability->isClosed($consulate, $date);
 
         if (! $valid) {
             throw BookingException::invalid();
@@ -77,9 +82,11 @@ class CreateAppointment
                 'notes' => $data['notes'] ?? null,
                 'status' => AppointmentStatus::Pending,
                 'locale' => $locale,
+                'consent_at' => now(),
             ]);
         });
 
+        $appointment->issueAccessToken();
         $this->sendConfirmation($appointment);
 
         return $appointment;
