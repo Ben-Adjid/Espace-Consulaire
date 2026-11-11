@@ -3,6 +3,7 @@ import { api, ApiError } from '@/lib/api';
 import { loadConsulate } from '@/lib/server';
 import type { PageContent } from '@/lib/types';
 import Prose from '@/components/Prose';
+export const instant = false;
 
 /** Pages libres : mentions légales, confidentialité, démo non officielle… */
 export default async function StaticPage({ params }: { params: Promise<{ consulate: string; lang: string; slug: string }> }) {

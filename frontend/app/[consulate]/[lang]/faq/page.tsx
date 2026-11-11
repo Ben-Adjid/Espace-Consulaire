@@ -3,6 +3,7 @@ import { loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import type { Faq } from '@/lib/types';
 import FaqSearch from '@/components/FaqSearch';
+export const instant = false;
 
 export const metadata = { title: 'Questions fréquentes' };
 

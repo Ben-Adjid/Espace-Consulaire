@@ -6,6 +6,7 @@ import { t } from '@/lib/i18n';
 import type { Service } from '@/lib/types';
 import Prose from '@/components/Prose';
 import DocumentChecklist from '@/components/DocumentChecklist';
+export const instant = false;
 
 export default async function ServicePage({ params }: { params: Promise<{ consulate: string; lang: string; slug: string }> }) {
   const { consulate: slug, lang: rawLang, slug: serviceSlug } = await params;

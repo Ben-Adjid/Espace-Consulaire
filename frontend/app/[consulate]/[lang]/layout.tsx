@@ -6,6 +6,7 @@ import SiteFooter from '@/components/SiteFooter';
 import { dirOf, t } from '@/lib/i18n';
 import { baseOf, loadConsulate, loadLegalPages } from '@/lib/server';
 import type { Lang } from '@/lib/types';
+export const instant = false;
 
 interface Params {
   consulate: string;

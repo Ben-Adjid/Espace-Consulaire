@@ -42,14 +42,19 @@ class Service extends Model
         return $query->orderBy('sort_order')->orderBy('id');
     }
 
-    /** Liste des documents requis (un par ligne dans l'éditeur). */
+    /**
+     * Liste des documents requis (un par ligne dans l'éditeur).
+     * Expressions régulières en mode /u : sans lui, \R coupe les caractères arabes multi-octets.
+     */
     public function documentsList(): array
     {
         $text = (string) $this->getTranslation('required_documents', app()->getLocale());
 
+        $lines = preg_split('/\R/u', $text) ?: [];
+
         return array_values(array_filter(array_map(
-            fn ($line) => trim(ltrim(trim($line), '-•*')),
-            preg_split('/\R/', $text) ?: []
+            fn (string $line) => trim((string) preg_replace('/^[\-•*\s]+/u', '', $line)),
+            $lines
         )));
     }
 }

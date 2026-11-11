@@ -1,6 +1,7 @@
 import { loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import AppointmentManager from '@/components/AppointmentManager';
+export const instant = false;
 
 export const metadata = { title: 'Rendez-vous enregistré' };
 

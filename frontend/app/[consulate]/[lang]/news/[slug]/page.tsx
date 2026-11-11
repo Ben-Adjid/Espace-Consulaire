@@ -5,6 +5,7 @@ import { baseOf, loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import type { NewsItem } from '@/lib/types';
 import Prose from '@/components/Prose';
+export const instant = false;
 
 export default async function NewsDetail({ params }: { params: Promise<{ consulate: string; lang: string; slug: string }> }) {
   const { consulate: slug, lang: rawLang, slug: newsSlug } = await params;

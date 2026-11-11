@@ -3,6 +3,7 @@ import { api } from '@/lib/api';
 import { baseOf, loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import type { NewsItem, Paginated } from '@/lib/types';
+export const instant = false;
 
 export const metadata = { title: 'Actualités' };
 

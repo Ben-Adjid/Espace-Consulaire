@@ -17,11 +17,25 @@
 }
 
 @layer components {
-  .btn { @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply btn text-white hover:brightness-110; background: var(--brand); }
-  .btn-accent { @apply btn text-slate-900 hover:brightness-95; background: var(--brand-2); }
-  .btn-outline { @apply btn border text-[var(--brand)] hover:text-white; border-color: var(--brand); }
-  .btn-outline:hover { background: var(--brand); }
+  .btn {
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: filter 150ms, background-color 150ms, color 150ms;
+  }
+  .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+  .btn-primary { @apply text-white; background: var(--brand); }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-accent { @apply text-slate-900; background: var(--brand-2); }
+  .btn-accent:hover { filter: brightness(0.95); }
+  .btn-outline { border: 1px solid var(--brand); color: var(--brand); }
+  .btn-outline:hover { background: var(--brand); color: #fff; }
   .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
   .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm; }
   .input:focus { border-color: var(--brand); outline: 2px solid color-mix(in srgb, var(--brand) 35%, transparent); }

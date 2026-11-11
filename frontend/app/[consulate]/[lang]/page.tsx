@@ -6,6 +6,7 @@ import type { NewsItem, Service } from '@/lib/types';
 import Prose from '@/components/Prose';
 import OsmMap from '@/components/OsmMap';
 import Logo from '@/components/Logo';
+export const instant = false;
 
 export default async function Home({ params }: { params: Promise<{ consulate: string; lang: string }> }) {
   const { consulate: slug, lang: rawLang } = await params;
