@@ -33,7 +33,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/availability/dates', [AppointmentController::class, 'dates']);
             Route::get('/availability/slots', [AppointmentController::class, 'slots']);
-            Route::post('/appointments', [AppointmentController::class, 'store'])->middleware('throttle:30,1');
+            Route::post('/appointments', [AppointmentController::class, 'store'])->middleware('throttle:booking');
             Route::get('/appointments/{reference}', [AppointmentController::class, 'show']);
             Route::post('/appointments/{reference}/cancel', [AppointmentController::class, 'cancel'])->middleware('throttle:10,1');
             Route::get('/appointments/{reference}/ics', [AppointmentController::class, 'ics']);

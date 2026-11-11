@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -36,6 +37,18 @@ class EditUser extends EditRecord
 
         /** @var User $user */
         $user = $this->record;
+        $previousRole = $user->roles()->value('name');
         $user->syncRoles([$role]);
+
+        if ($previousRole !== $role) {
+            ActivityLog::query()->create([
+                'consulate_id' => $user->consulate_id,
+                'actor_id' => auth()->id(),
+                'action' => 'role_updated',
+                'subject_type' => User::class,
+                'subject_id' => (string) $user->getKey(),
+                'changed_fields' => ['role'],
+            ]);
+        }
     }
 }

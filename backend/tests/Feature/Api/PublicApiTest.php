@@ -201,6 +201,18 @@ class PublicApiTest extends TestCase
         $this->assertSame(0, Appointment::withoutGlobalScopes()->count());
     }
 
+    public function test_booking_uses_the_configured_rate_limiter(): void
+    {
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['website' => 'spam']))->assertCreated();
+        }
+
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['website' => 'spam']))
+            ->assertTooManyRequests();
+
+        $this->assertSame(0, Appointment::withoutGlobalScopes()->count());
+    }
+
     public function test_contact_form_requires_consent_and_stores_message(): void
     {
         $this->postJson('/api/v1/cameroun-senegal/contact', [

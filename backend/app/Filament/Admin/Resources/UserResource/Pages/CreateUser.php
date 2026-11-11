@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Validation\ValidationException;
@@ -35,5 +36,14 @@ class CreateUser extends CreateRecord
         /** @var User $user */
         $user = $this->record;
         $user->syncRoles([$role]);
+
+        ActivityLog::query()->create([
+            'consulate_id' => $user->consulate_id,
+            'actor_id' => auth()->id(),
+            'action' => 'role_assigned',
+            'subject_type' => User::class,
+            'subject_id' => (string) $user->getKey(),
+            'changed_fields' => ['role'],
+        ]);
     }
 }

@@ -16,7 +16,6 @@ use App\Services\ConsulateContext;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
 
 /** Disponibilités, prise de rendez-vous, consultation / annulation par jeton, export .ics. */
 class AppointmentController extends Controller
@@ -60,12 +59,6 @@ class AppointmentController extends Controller
         if (filled($request->input('website'))) {
             return response()->json(['message' => 'Demande enregistrée.'], 201);
         }
-
-        $key = 'booking:'.$request->ip();
-        if (RateLimiter::tooManyAttempts($key, 10)) {
-            return response()->json(['message' => 'Trop de tentatives. Réessayez dans une minute.'], 429);
-        }
-        RateLimiter::hit($key, 60);
 
         $consulate = $context->require();
         $service = Service::withoutGlobalScopes()

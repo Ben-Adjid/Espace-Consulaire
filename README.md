@@ -124,6 +124,7 @@ annulation et export `.ics` ; pages légales ; FR / EN / AR avec mise en page RT
 - Rappels J-1 par email, une seule fois par rendez-vous.
 - Purge RGPD automatique des données personnelles au-delà de `DATA_RETENTION_DAYS`.
 - Export CSV des rendez-vous, graphique des rendez-vous par service dans le tableau de bord.
+- Journal des créations, modifications et suppressions effectuées dans l'administration; seuls les noms de champs modifiés sont conservés.
 - Rôles et permissions (Spatie) : isolation des données par consulat, policies, super_admin.
 
 ## Tests
@@ -136,9 +137,21 @@ php artisan test
 Les tests utilisent SQLite en mémoire (`phpunit.xml`). Ils couvrent l'API publique (réservation, jeton, annulation,
 ics, fermetures, consentement, anti-spam, rappels, purge), l'isolation multi-consulats et la création de contenu par un admin.
 
-## Limites connues
+## Reste à faire avant une mise en production
 
-- Pas d'envoi d'email réel par défaut (`MAIL_MAILER=log`). En production, configurez SMTP et une file d'attente.
-- Pas encore : journal d'activité des actions admin, double authentification admin, PWA, images WebP automatiques,
-  éditeur riche, tests de bout en bout dans le navigateur. Voir la table `feature_backlog` (MySQL).
-- Pas de paiement ni de pré-demande en ligne : voir la feuille de route V2.
+- Configurer et tester un vrai transport SMTP; la valeur par défaut est `MAIL_MAILER=log`.
+- Ajouter la double authentification au panneau admin et des tests de bout en bout dans un navigateur.
+- Rejouer les migrations et tests sur MySQL dans un environnement de préproduction; les tests automatisés actuels utilisent SQLite.
+- Définir les procédures opérationnelles : sauvegarde et restauration, supervision des tâches planifiées, sécurité des comptes et politique de conservation conforme aux lois applicables.
+- L'annulation en ligne est disponible; le changement de date ou d'heure par le visiteur ne l'est pas encore.
+
+## Propositions de fonctionnalités
+
+1. **Replanifier un rendez-vous** sans devoir l'annuler puis tout recommencer, avec contrôle de capacité.
+2. **Notifications multicanales** (email d'abord, puis SMS/WhatsApp selon le consentement et le pays).
+3. **Centre de démarches personnalisé** : liste de documents, progression et rappels, sans téléverser de pièces sensibles au départ.
+4. **Gestion des files d'attente et rendez-vous annulés** pour libérer plus facilement les créneaux.
+5. **Rapports d'activité** par période, service et consulat, avec export contrôlé par rôle.
+6. **Accessibilité et navigation à faible débit** : vérification WCAG, tests mobile/RTL et amélioration des pages hors connexion.
+
+Les paiements, pré-demandes avec pièces jointes, suivi de dossiers, immatriculation et alertes d'urgence restent des modules V2 à cadrer avant intégration; voir [backend/docs/ROADMAP_V2.md](backend/docs/ROADMAP_V2.md).

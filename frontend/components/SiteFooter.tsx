@@ -27,6 +27,7 @@ export default function SiteFooter({ consulate, lang, base, pages }: { consulate
                 <li key={p.slug}><Link className="hover:underline" href={`${base}/pages/${p.slug}`}>{p.title}</Link></li>
               ))}
               <li><Link className="hover:underline" href="/">{t(lang, 'other_consulates')}</Link></li>
+              <li><a className="hover:underline" href={process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://127.0.0.1:8000/admin'} target="_blank" rel="noopener noreferrer">{t(lang, 'admin_space')}</a></li>
             </ul>
           </div>
         </div>

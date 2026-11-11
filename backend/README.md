@@ -11,8 +11,9 @@ Voir [PLAN.md](PLAN.md) (architecture et schéma), [DECISIONS.md](DECISIONS.md) 
 
 ## Stack
 
-Laravel 12 · PHP 8.2+ · MySQL 8 · Filament 3 · Blade + Livewire 3 · Tailwind CSS 4 (Vite) ·
-spatie/laravel-translatable (FR / EN / AR) · spatie/laravel-permission · Leaflet / OpenStreetMap · PHPUnit.
+Laravel 12 · PHP 8.2+ · MySQL 8 · API JSON v1 · Filament 3 ·
+spatie/laravel-translatable (FR / EN / AR) · spatie/laravel-permission · PHPUnit.
+Le site public est une application Next.js séparée dans `../frontend`.
 
 ## Prérequis
 
@@ -66,11 +67,16 @@ créneaux, quelques rendez-vous et messages) et les comptes de démo.
 Deux terminaux :
 
 ```bash
-php artisan serve        # http://127.0.0.1:8000
-npm run dev              # Vite (rechargement des assets)
+php artisan serve        # API + administration : http://127.0.0.1:8000
 ```
 
-Pour une version compilée sans `npm run dev` : `npm run build`.
+Dans un second terminal, lancez le site public depuis `../frontend` :
+
+```bash
+cd ../frontend
+npm install
+npm run dev              # http://localhost:3000
+```
 
 ### Sous Windows : activer `intl` sans modifier `php.ini`
 
@@ -85,13 +91,13 @@ php -m | Select-String intl
 
 | Page | URL |
 |---|---|
-| Choix du consulat | http://127.0.0.1:8000/ |
-| Consulat du Tchad (FR) | http://127.0.0.1:8000/tchad-senegal |
-| Consulat du Tchad (EN / AR) | http://127.0.0.1:8000/tchad-senegal?lang=en · `?lang=ar` (RTL) |
-| Consulat du Cameroun | http://127.0.0.1:8000/cameroun-senegal |
-| Prise de rendez-vous | http://127.0.0.1:8000/tchad-senegal/appointment |
+| Choix du consulat | http://localhost:3000/ |
+| Consulat du Tchad (FR / EN / AR) | http://localhost:3000/tchad-senegal/fr · `/en` · `/ar` |
+| Consulat du Cameroun (FR) | http://localhost:3000/cameroun-senegal/fr |
+| Prise de rendez-vous | http://localhost:3000/tchad-senegal/fr/appointment |
+| API publique | http://127.0.0.1:8000/api/v1/tchad-senegal |
 | Administration | http://127.0.0.1:8000/admin |
-| Sitemap / robots | http://127.0.0.1:8000/sitemap.xml · `/robots.txt` |
+| Sitemap / robots | http://localhost:3000/sitemap.xml · `/robots.txt` |
 
 ## Comptes de démo
 
@@ -113,21 +119,22 @@ Vérifier l'isolation : connectez-vous avec `admin.tchad@demo.test` : vous ne vo
 php artisan test
 ```
 
-Les tests utilisent SQLite en mémoire (configuré dans `phpunit.xml`). Ils couvrent : capacité des créneaux,
-refus d'une double réservation, isolation multi-consulats (admin et pages publiques), anti-spam du formulaire de contact.
+Les tests utilisent SQLite en mémoire (configuré dans `phpunit.xml`). Ils couvrent l'API publique, capacité et fermeture des créneaux,
+protection des rendez-vous par jeton, consentement et purge, anti-spam, isolation multi-consulats et journal d'activité admin.
 
 ## Fonctionnement multi-consulats
 
-- Les pages publiques sont sous `/{slug}` ; le middleware `consulate` charge le consulat, la langue et le thème.
+- Les pages publiques sont servies par Next.js sous `/{slug}/{lang}`; l'API Laravel résout le consulat et la langue.
 - Dans Filament, le global scope `ConsulateScope` limite chaque utilisateur à son consulat ; le super_admin voit tout.
   Les policies ajoutent une seconde vérification.
 - Les couleurs du consulat sont injectées en variables CSS (`--brand`, `--brand-2`, `--brand-3`) après validation.
 
 ## Sécurité
 
-- Formulaires : Form Requests, protection CSRF, échappement Blade (le texte saisi est affiché en texte brut).
+- API : Form Requests et validation; les contenus saisis sont rendus en texte brut côté frontend.
 - Anti-spam : honeypot + horodatage chiffré + rate limiting (contact : 5/min, rendez-vous : 10/min par IP).
 - Anti double réservation : transaction + verrou `lockForUpdate` sur le créneau + recomptage des places.
+- Les actions admin sont consignées sans conserver les valeurs des champs modifiés; l'accès au journal respecte l'isolation par consulat.
 - En-têtes : `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
 - Aucun secret dans le code : tout passe par `.env`.
 
@@ -138,6 +145,7 @@ Voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 ## Limites connues
 
 - Pas de véritable envoi d'email par défaut (`MAIL_MAILER=log`, les messages sont dans `storage/logs`).
-- Créneaux récurrents hebdomadaires uniquement ; pas encore de fermetures exceptionnelles par date.
-- Les rendez-vous ne peuvent pas être modifiés par le public (annulation via l'admin ou le contact).
+- Les emails sont envoyés de façon synchrone; le worker de file d'attente n'est pas encore utilisé par les notifications.
+- Pas encore de double authentification admin ni de tests de bout en bout navigateur.
+- Les rendez-vous peuvent être annulés par lien personnel; le visiteur ne peut pas encore les replanifier.
 - Pas de paiement ni de pré-demande en ligne : voir [docs/ROADMAP_V2.md](docs/ROADMAP_V2.md).
