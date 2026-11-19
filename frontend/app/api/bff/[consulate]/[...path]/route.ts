@@ -8,7 +8,8 @@ import { API_URL } from '@/lib/api';
  */
 
 const SLUG = /^[a-z0-9][a-z0-9-]*$/;
-const SEGMENT = /^[a-z0-9-]+$/;
+// Majuscules autorisées : les références de rendez-vous (TCH-SN-…) sont en majuscules.
+const SEGMENT = /^[A-Za-z0-9-]+$/;
 const MAX_AGE = 60 * 60 * 24 * 30; // 30 jours
 
 const cookieName = (slug: string) => `citizen_session_${slug}`;

@@ -246,9 +246,10 @@ export function PreRequestEditor({ consulateSlug, lang, base, id }: { consulateS
             </div>
             <div>
               <label className="label" htmlFor="doc-file">{t(lang, 'pre_doc_file')}</label>
-              <input id="doc-file" type="file" accept="application/pdf,image/jpeg,image/png" className="input" disabled={busy}
+              {/* Le nom de la pièce est obligatoire : sans lui, le fichier n'est pas téléversé. */}
+              <input id="doc-file" type="file" accept="application/pdf,image/jpeg,image/png" className="input" disabled={busy || !label.trim()}
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
-              <p className="mt-1 text-xs text-slate-500">{t(lang, 'pre_doc_hint')}</p>
+              <p className="mt-1 text-xs text-slate-500">{label.trim() ? t(lang, 'pre_doc_hint') : t(lang, 'pre_doc_need_label')}</p>
             </div>
           </div>
         )}
