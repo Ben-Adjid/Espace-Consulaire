@@ -36,6 +36,8 @@ class CommissionRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\Action::make('add')->label(__('Ajouter un membre'))->icon('heroicon-o-user-plus')
                     ->visible(fn () => $this->getOwnerRecord()->commissionMembers()->count() < AssociationCommissionMember::MAX_MEMBERS)
+                    // La liste de recherche s'affiche hors de la fenêtre : un clic dedans ne doit pas fermer le formulaire.
+                    ->closeModalByClickingAway(false)
                     ->form([
                         Forms\Components\Select::make('citizen_id')->label(__('Citoyen'))->searchable()->required()
                             ->options(fn () => Citizen::query()

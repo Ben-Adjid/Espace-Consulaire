@@ -24,6 +24,8 @@ interface Election {
   results: { round: number; roles: Result[] }[] | null;
   chain: { valid: boolean; length: number; head: string | null } | null;
   attestation: { count: number; required: number; attested: boolean } | null;
+  is_partial: boolean;
+  scope_roles: string[] | null;
 }
 interface Condition { role: string; label: string; unmet: string[]; requires_document: boolean }
 interface Listing { data: Election[]; meta: { eligible: boolean; roles: Record<string, string>; conditions: Condition[]; is_commission: boolean } }
@@ -98,13 +100,20 @@ export default function AssociationElections({ consulateSlug, lang }: { consulat
         return (
           <section key={e.id} className="card space-y-4 p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-bold text-brand">{t(lang, 'elec_title')} {e.year}</h2>
+              <div>
+                <h2 className="font-bold text-brand">{e.is_partial ? t(lang, 'elec_partial_title') : t(lang, 'elec_title')} {e.year}</h2>
+                {e.is_partial && e.scope_roles && (
+                  <p className="text-sm text-slate-600">{t(lang, 'elec_partial_scope')} : {e.scope_roles.map((r) => roles[r] ?? r).join(', ')}</p>
+                )}
+              </div>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
                 {phaseLabel}{e.phase === 'voting' && e.round > 1 ? ` · ${t(lang, 'elec_round2')}` : ''}
               </span>
             </div>
             <p className="text-sm text-slate-600">
-              {t(lang, 'elec_opens')} : {date(lang, e.opens_at)} · {t(lang, 'elec_closes')} : {date(lang, e.closes_at)}
+              {e.phase === 'candidacy'
+                ? <>{t(lang, 'elec_voting_from')} : {date(lang, e.opens_at)} · {t(lang, 'elec_closes')} : {date(lang, e.closes_at)}</>
+                : <>{t(lang, 'elec_voting_since')} : {date(lang, e.opens_at)} · {t(lang, 'elec_closes')} : {date(lang, e.closes_at)}</>}
             </p>
 
             {e.my_candidacy && (

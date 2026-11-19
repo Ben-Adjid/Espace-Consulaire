@@ -48,7 +48,8 @@ class OfficersRelationManager extends RelationManager
                     ->state(fn (AssociationOfficer $r) => $r->isCurrent() ? 'En cours' : 'Terminé')
                     ->badge()->color(fn (string $state) => $state === 'En cours' ? 'success' : 'gray'),
             ])
-            ->headerActions([Tables\Actions\CreateAction::make()->label(__('Ajouter au bureau'))])
+            // Liste de citoyens dans la fenêtre : un clic dans la liste ne doit pas la fermer.
+            ->headerActions([Tables\Actions\CreateAction::make()->label(__('Ajouter au bureau'))->closeModalByClickingAway(false)])
             ->actions([Tables\Actions\EditAction::make(), Tables\Actions\DeleteAction::make()]);
     }
 }

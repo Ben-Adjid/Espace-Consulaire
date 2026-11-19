@@ -925,5 +925,6 @@
     "Passeport valable au moins (mois)": "Passport valid for at least (months)",
     "Passeport valable au moins :months mois requis. Indiquez sa date d’expiration dans la pièce « Passeport ».": "Passport valid for at least :months months required. Enter its expiry date in the “Passport” document.",
     "Réservé aux membres du bureau en exercice.": "Reserved for sitting board members.",
-    "Votre fonction ne permet pas cette action.": "Your position does not allow this action."
+    "Votre fonction ne permet pas cette action.": "Your position does not allow this action.",
+    "Secrétariat": "Secretariat"
 }

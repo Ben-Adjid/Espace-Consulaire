@@ -48,6 +48,7 @@ class WelcomeWidget extends Widget
         $roleLabel = match (true) {
             $user->isSuperAdmin() => __('Super administrateur · toute la plateforme'),
             $user->hasRole(User::ROLE_CONSULATE_ADMIN) => __('Consul'),
+            $user->hasRole(User::ROLE_SECRETARIAT) => __('Secrétariat'),
             default => __('Agent consulaire'),
         };
 

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { bff } from '@/lib/bff';
 import { t } from '@/lib/i18n';
 import type { Lang } from '@/lib/types';
@@ -10,6 +11,14 @@ import type { Lang } from '@/lib/types';
 export default function CitizenSpaceNav({ consulateSlug, lang, base }: { consulateSlug: string; lang: Lang; base: string }) {
   const pathname = usePathname();
   const router = useRouter();
+  // « Espace du bureau » n'est proposé qu'aux membres du bureau en exercice.
+  const [inOffice, setInOffice] = useState(false);
+
+  useEffect(() => {
+    bff<{ association?: { current?: unknown[] } }>(consulateSlug, 'citizen/me', { lang })
+      .then((r) => setInOffice((r.association?.current?.length ?? 0) > 0))
+      .catch(() => setInOffice(false));
+  }, [consulateSlug, lang]);
 
   const links = [
     { href: `${base}/compte`, label: t(lang, 'account_nav_home'), exact: true },
@@ -18,7 +27,7 @@ export default function CitizenSpaceNav({ consulateSlug, lang, base }: { consula
     { href: `${base}/compte/messages`, label: t(lang, 'msg_page_title') },
     { href: `${base}/compte/elections`, label: t(lang, 'elec_nav') },
     { href: `${base}/compte/finances`, label: t(lang, 'ledger_page_title') },
-    { href: `${base}/compte/bureau`, label: t(lang, 'board_page_title') },
+    ...(inOffice ? [{ href: `${base}/compte/bureau`, label: t(lang, 'board_page_title') }] : []),
     { href: `${base}/compte/chronologie`, label: t(lang, 'timeline_page_title') },
     { href: `${base}/compte/famille`, label: t(lang, 'family_title') },
     { href: `${base}/compte/signalements`, label: t(lang, 'report_title') },

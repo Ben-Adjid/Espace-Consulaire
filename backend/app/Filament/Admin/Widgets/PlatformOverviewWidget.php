@@ -33,6 +33,8 @@ class PlatformOverviewWidget extends StatsOverviewWidget
         $online = $states->filter(fn ($s) => $s !== 'inactive' && $s !== 'suspended')->count();
         $toRenew = $states->filter(fn ($s) => in_array($s, ['expiring', 'grace'], true))->count();
         $blocked = $states->filter(fn ($s) => in_array($s, ['inactive', 'suspended'], true))->count();
+        // Consulats qui n'ont jamais enregistré d'abonnement : à signaler, jamais affichés comme « à jour ».
+        $withoutSubscription = $states->filter(fn ($s) => $s === 'none')->count();
 
         $month = Appointment::query()
             ->whereBetween('appointment_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
@@ -44,8 +46,12 @@ class PlatformOverviewWidget extends StatsOverviewWidget
                 ->icon('heroicon-o-building-library')->color('primary')
                 ->url(\App\Filament\Admin\Resources\ConsulateResource::getUrl()),
             Stat::make(__('Abonnements à renouveler'), $toRenew)
-                ->description($toRenew ? __('Échéance proche ou délai de grâce') : __('Tous à jour'))
-                ->icon('heroicon-o-arrow-path')->color($toRenew ? 'warning' : 'success')
+                ->description(match (true) {
+                    $toRenew > 0 => __('Échéance proche ou délai de grâce'),
+                    $withoutSubscription > 0 => __(':count sans abonnement enregistré', ['count' => $withoutSubscription]),
+                    default => __('Tous à jour'),
+                })
+                ->icon('heroicon-o-arrow-path')->color(($toRenew > 0 || $withoutSubscription > 0) ? 'warning' : 'success')
                 ->url(\App\Filament\Admin\Resources\ConsulateResource::getUrl()),
             Stat::make(__('Citoyens inscrits'), Citizen::query()->count())
                 ->description(__(':count rendez-vous ce mois-ci, tous consulats', ['count' => $month]))

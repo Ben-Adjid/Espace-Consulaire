@@ -225,7 +225,9 @@ class AssociationGovernanceTest extends TestCase
 
         $partial = AssociationElection::where('is_partial', true)->first();
         $this->assertNotNull($partial);
-        $this->assertSame(['treasurer'], $partial->scope_roles);
+        // Tout poste non pourvu entre dans l'élection partielle, y compris ceux sans aucun candidat (ex. présidence).
+        $this->assertContains('treasurer', $partial->scope_roles);
+        $this->assertContains('president', $partial->scope_roles);
         $this->assertSame(6200, $partial->year);
         $this->assertSame('candidacy', $partial->phase());
 

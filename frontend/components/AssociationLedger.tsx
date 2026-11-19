@@ -37,6 +37,8 @@ export default function AssociationLedger({ consulateSlug, lang }: { consulateSl
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({ amount: '', label: '', occurred_on: new Date().toISOString().slice(0, 10) });
+  // Le trésorier peut enregistrer une cotisation ET proposer une dépense : il choisit le mode.
+  const [mode, setMode] = useState<'contribution' | 'expense'>('contribution');
 
   function load() {
     bff<{ data: Ledger }>(consulateSlug, 'citizen/association/ledger', { lang })
@@ -83,18 +85,33 @@ export default function AssociationLedger({ consulateSlug, lang }: { consulateSl
         </p>
       </div>
 
-      {(ledger.can_record_contribution || ledger.can_propose_expense) && (
+      {(ledger.can_record_contribution || ledger.can_propose_expense) && (() => {
+        const asContribution = ledger.can_record_contribution && (mode === 'contribution' || !ledger.can_propose_expense);
+        return (
         <form className="card grid gap-3 p-5 sm:grid-cols-2" onSubmit={(e) => {
           e.preventDefault();
-          if (ledger.can_record_contribution) {
+          if (asContribution) {
             run('citizen/association/ledger/contribution', { amount, label: form.label, occurred_on: form.occurred_on }, t(lang, 'ledger_saved'));
           } else {
             run('citizen/association/ledger/expense', { amount, label: form.label, occurred_on: form.occurred_on }, t(lang, 'ledger_proposed'));
           }
         }}>
-          <p className="font-semibold text-slate-900 sm:col-span-2">
-            {ledger.can_record_contribution ? t(lang, 'ledger_record_contribution') : t(lang, 'ledger_propose_expense')}
-          </p>
+          {ledger.can_record_contribution && ledger.can_propose_expense ? (
+            <div className="flex flex-wrap gap-2 sm:col-span-2" role="tablist">
+              <button type="button" role="tab" aria-selected={asContribution} onClick={() => setMode('contribution')}
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${asContribution ? 'bg-brand text-white' : 'bg-slate-100 text-slate-700'}`}>
+                {t(lang, 'ledger_record_contribution')}
+              </button>
+              <button type="button" role="tab" aria-selected={!asContribution} onClick={() => setMode('expense')}
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${!asContribution ? 'bg-brand text-white' : 'bg-slate-100 text-slate-700'}`}>
+                {t(lang, 'ledger_propose_expense')}
+              </button>
+            </div>
+          ) : (
+            <p className="font-semibold text-slate-900 sm:col-span-2">
+              {asContribution ? t(lang, 'ledger_record_contribution') : t(lang, 'ledger_propose_expense')}
+            </p>
+          )}
           <div>
             <label htmlFor="ledger-amount" className="label">{t(lang, 'ledger_amount')}</label>
             <input id="ledger-amount" className="input" inputMode="numeric" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value.replace(/\D/g, '') })} dir="ltr" />
@@ -108,10 +125,11 @@ export default function AssociationLedger({ consulateSlug, lang }: { consulateSl
             <input id="ledger-label" className="input" maxLength={190} value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} />
           </div>
           <div className="sm:col-span-2 flex justify-end">
-            <button type="submit" disabled={busy || !valid} className="btn-primary px-5 py-2.5">{t(lang, 'ledger_submit')}</button>
+            <button type="submit" disabled={busy || !valid} className="btn-primary px-5 py-2.5">{asContribution ? t(lang, 'ledger_submit') : t(lang, 'ledger_propose')}</button>
           </div>
         </form>
-      )}
+        );
+      })()}
 
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-brand">{t(lang, 'ledger_entries')}</h2>
@@ -124,7 +142,7 @@ export default function AssociationLedger({ consulateSlug, lang }: { consulateSl
                 <p className="text-xs text-slate-500">
                   {e.kind_label} · {e.occurred_on}
                   {e.proposed_by ? ` · ${t(lang, 'ledger_proposed_by')} ${e.proposed_by}` : ''}
-                  {e.approved_by && e.status === 'approved' ? ` · ${t(lang, 'ledger_approved_by')} ${e.approved_by}` : ''}
+                  {e.approved_by && e.status === 'approved' && e.approved_by !== e.proposed_by ?` · ${t(lang, 'ledger_approved_by')} ${e.approved_by}` : ''}
                 </p>
               </div>
               <div className="flex items-center gap-3">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ApiError } from '@/lib/api';
-import { bff } from '@/lib/bff';
+import { bff, bffRaw } from '@/lib/bff';
 import type { Lang } from '@/lib/types';
 import { t } from '@/lib/i18n';
 
@@ -31,6 +31,36 @@ export default function AssociationBoard({ consulateSlug, lang }: { consulateSlu
   const [info, setInfo] = useState({ description: '', email: '', phone: '' });
 
   const [newMember, setNewMember] = useState({ full_name: '', category: 'student' });
+  const [journal, setJournal] = useState<{ at: string; by: string; action: string; label: string }[] | null>(null);
+
+  async function loadJournal() {
+    try {
+      const r = await bff<{ data: { at: string; by: string; action: string; label: string }[] }>(consulateSlug, 'citizen/association/journal', { lang });
+      setJournal(r.data);
+    } catch {
+      setJournal(null);
+    }
+  }
+
+  // Export du registre : fichier CSV téléchargé (sans contacts), l'export est inscrit au journal côté serveur.
+  async function exportRegistry() {
+    setError(null);
+    try {
+      const res = await bffRaw(consulateSlug, 'citizen/association/members/export.csv', { lang });
+      if (!res.ok) throw new Error(String(res.status));
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'registre-adherents.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+      setMessage(t(lang, 'board_export_done'));
+      loadJournal();
+    } catch {
+      setError(t(lang, 'error'));
+    }
+  }
 
   async function reloadMembers() {
     try {
@@ -46,6 +76,7 @@ export default function AssociationBoard({ consulateSlug, lang }: { consulateSlu
       .then((r) => setBoard(r.data))
       .catch((err) => setError(errorText(lang, err)));
     reloadMembers();
+    loadJournal();
   }, [consulateSlug, lang]);
 
   async function send(fn: () => Promise<unknown>, ok: string) {
@@ -84,7 +115,7 @@ export default function AssociationBoard({ consulateSlug, lang }: { consulateSlu
       )}
 
       {PUBLISH.includes(board.role) && (
-        <form className="card grid gap-3 p-5 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); send(() => bff(consulateSlug, 'citizen/association/activities', { method: 'POST', lang, body: activity }), t(lang, 'board_activity_published')); }}>
+        <form className="card grid gap-3 p-5 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); send(async () => { await bff(consulateSlug, 'citizen/association/activities', { method: 'POST', lang, body: activity }); setActivity({ title: '', starts_on: new Date().toISOString().slice(0, 10), location: '', description: '' }); loadJournal(); }, t(lang, 'board_activity_published')); }}>
           <p className="font-semibold sm:col-span-2">{t(lang, 'board_publish_activity')}</p>
           <input className="input" required maxLength={160} placeholder={t(lang, 'board_title')} value={activity.title} onChange={(e) => setActivity({ ...activity, title: e.target.value })} />
           <input className="input" type="date" required value={activity.starts_on} onChange={(e) => setActivity({ ...activity, starts_on: e.target.value })} />
@@ -118,7 +149,10 @@ export default function AssociationBoard({ consulateSlug, lang }: { consulateSlu
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-brand">{t(lang, 'board_registry')}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-bold text-brand">{t(lang, 'board_registry')}</h2>
+          <button type="button" onClick={exportRegistry} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">{t(lang, 'board_export')}</button>
+        </div>
         {members && members.length === 0 && <p className="text-sm text-slate-500">{t(lang, 'board_registry_none')}</p>}
         {members && members.length > 0 && (
           <div className="overflow-x-auto">
@@ -135,6 +169,28 @@ export default function AssociationBoard({ consulateSlug, lang }: { consulateSlu
                         </button>
                       </td>
                     )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-bold text-brand">{t(lang, 'board_journal')}</h2>
+        <p className="text-xs text-slate-500">{t(lang, 'board_journal_hint')}</p>
+        {journal && journal.length === 0 && <p className="text-sm text-slate-500">{t(lang, 'board_journal_none')}</p>}
+        {journal && journal.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="text-start text-slate-500"><th className="p-2 text-start">{t(lang, 'board_journal_when')}</th><th className="p-2 text-start">{t(lang, 'board_journal_by')}</th><th className="p-2 text-start">{t(lang, 'board_journal_what')}</th></tr></thead>
+              <tbody>
+                {journal.map((j, i) => (
+                  <tr key={i} className="border-t border-slate-100">
+                    <td className="p-2 whitespace-nowrap">{new Date(j.at).toLocaleString(lang === 'ar' ? 'ar' : lang === 'en' ? 'en-GB' : 'fr-FR')}</td>
+                    <td className="p-2">{j.by}</td>
+                    <td className="p-2">{j.label}</td>
                   </tr>
                 ))}
               </tbody>

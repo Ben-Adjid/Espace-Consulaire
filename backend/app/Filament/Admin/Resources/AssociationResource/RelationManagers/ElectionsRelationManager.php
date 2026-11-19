@@ -41,7 +41,8 @@ class ElectionsRelationManager extends RelationManager
             Forms\Components\DatePicker::make('held_on')->label(__('Date de l’élection'))
                 ->required(fn (Get $get) => blank($get('voting_opens_at')))
                 ->helperText(__('Pour un vote en ligne, la date est celle de la fermeture du scrutin.')),
-            Forms\Components\DateTimePicker::make('voting_opens_at')->label(__('Ouverture du vote en ligne'))
+            // live() : la présence de la date d'ouverture décide du mode (en ligne ou hors ligne) dès la saisie.
+            Forms\Components\DateTimePicker::make('voting_opens_at')->label(__('Ouverture du vote en ligne'))->live()
                 ->helperText(__('Laisser vide pour une élection hors ligne. Avant cette date : période de candidature.')),
             Forms\Components\DateTimePicker::make('voting_closes_at')->label(__('Fermeture du vote en ligne'))
                 ->afterOrEqual('voting_opens_at')
@@ -101,28 +102,37 @@ class ElectionsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->label(__('Enregistrer une élection'))
+                    // Le répéteur du bureau contient des listes de citoyens : la fenêtre ne doit pas se fermer au clic.
+                    ->closeModalByClickingAway(false)
                     ->modalHeading(__('Enregistrer une élection'))
-                    ->using(function (array $data, RelationManager $livewire) {
+                    ->using(function (array $data, RelationManager $livewire, Tables\Actions\CreateAction $action) {
                         $association = $livewire->getOwnerRecord();
 
-                        if (filled($data['voting_opens_at'] ?? null)) {
-                            return app(CreateOnlineElection::class)(
+                        try {
+                            if (filled($data['voting_opens_at'] ?? null)) {
+                                return app(CreateOnlineElection::class)(
+                                    $association,
+                                    (int) $data['year'],
+                                    $data['voting_opens_at'],
+                                    $data['voting_closes_at'],
+                                    $data['notes'] ?? null,
+                                    (int) ($data['second_round_hours'] ?? 72),
+                                );
+                            }
+
+                            return app(RecordElection::class)(
                                 $association,
                                 (int) $data['year'],
-                                $data['voting_opens_at'],
-                                $data['voting_closes_at'],
+                                $data['held_on'],
+                                $data['officers'],
                                 $data['notes'] ?? null,
-                                (int) ($data['second_round_hours'] ?? 72),
                             );
+                        } catch (\Illuminate\Validation\ValidationException $e) {
+                            // Le motif (ex. « une élection est déjà enregistrée pour cette année ») reste visible, le formulaire reste ouvert.
+                            \Filament\Notifications\Notification::make()->danger()
+                                ->title(collect($e->errors())->flatten()->first())->persistent()->send();
+                            $action->halt();
                         }
-
-                        return app(RecordElection::class)(
-                            $association,
-                            (int) $data['year'],
-                            $data['held_on'],
-                            $data['officers'],
-                            $data['notes'] ?? null,
-                        );
                     }),
                 // Fin de mandat sans nouvelle élection : archive le bureau en cours, les titulaires redeviennent citoyens simples.
                 Tables\Actions\Action::make('closeBoard')

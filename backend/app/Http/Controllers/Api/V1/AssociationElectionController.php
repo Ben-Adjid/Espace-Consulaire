@@ -193,6 +193,8 @@ class AssociationElectionController extends Controller
             'results' => $published ? app(TallyElection::class)($e) : null,
             'attestation' => $published ? CommissionActions::summary($e) : null,
             'is_partial' => (bool) $e->is_partial,
+            // Élection partielle : fonctions vacantes couvertes, affichées pour distinguer le scrutin de l'élection principale.
+            'scope_roles' => $e->is_partial ? array_values((array) $e->scope_roles) : null,
             'chain' => $published ? app(VerifyVoteChain::class)($e->id) : null,
         ];
     }

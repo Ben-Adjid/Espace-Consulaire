@@ -73,7 +73,9 @@ class ConsularReceiptResource extends Resource
             Forms\Components\Select::make('service_id')->label(__('Service'))
                 ->options(fn () => Service::query()->orderBy('sort_order')->get()
                     ->mapWithKeys(fn (Service $s) => [$s->id => $s->getTranslation('name', 'fr')]))
-                ->searchable(),
+                ->searchable()
+                // Un encaissement doit indiquer la démarche payée, sinon il ne se rattache à aucun tarif.
+                ->required(),
             Forms\Components\TextInput::make('payer_name')->label(__('Nom du payeur'))->required()->maxLength(120),
             Forms\Components\TextInput::make('amount')->label(__('Montant'))->numeric()->minValue(0)->required(),
             Forms\Components\TextInput::make('currency')->label(__('Devise'))->default('XOF')->required()->maxLength(8),

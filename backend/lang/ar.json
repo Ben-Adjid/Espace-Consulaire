@@ -925,5 +925,6 @@
     "Passeport valable au moins (mois)": "صلاحية جواز السفر لمدة لا تقل عن (أشهر)",
     "Passeport valable au moins :months mois requis. Indiquez sa date d’expiration dans la pièce « Passeport ».": "مطلوب جواز سفر صالح لمدة :months شهراً على الأقل. أدخل تاريخ انتهائه في وثيقة « جواز السفر ».",
     "Réservé aux membres du bureau en exercice.": "مخصص لأعضاء المكتب في مناصبهم.",
-    "Votre fonction ne permet pas cette action.": "منصبك لا يسمح بهذا الإجراء."
+    "Votre fonction ne permet pas cette action.": "منصبك لا يسمح بهذا الإجراء.",
+    "Secrétariat": "الأمانة"
 }

@@ -83,7 +83,9 @@ class ServiceResource extends Resource
             Tables\Columns\TextColumn::make('name')->label(__('Service'))->searchable(),
             Tables\Columns\TextColumn::make('consulate.slug')->label(__('Consulat'))->badge()
                 ->visible(fn () => auth()->user()?->isSuperAdmin()),
-            Tables\Columns\TextColumn::make('fee')->label(__('Frais')),
+            // Montant en vigueur (table des frais datés), à défaut l'ancien texte libre.
+            Tables\Columns\TextColumn::make('fee')->label(__('Frais'))
+                ->state(fn (\App\Models\Service $r) => $r->feeOn()?->label() ?? $r->fee),
             Tables\Columns\IconColumn::make('allow_appointment')->label(__('RDV'))->boolean(),
             Tables\Columns\IconColumn::make('is_active')->label(__('Publié'))->boolean(),
             Tables\Columns\TextColumn::make('sort_order')->label(__('Ordre'))->sortable(),

@@ -52,10 +52,13 @@ class TodayWorkWidget extends StatsOverviewWidget
                 ->description(__(':arrived arrivé(s) · :waiting attendu(s)', ['arrived' => $arrived, 'waiting' => max(0, $expected - $arrived)]))
                 ->icon('heroicon-o-calendar')->color('primary')
                 ->url($queueUrl),
-            Stat::make(__('Pré-demandes à examiner'), $requests)
-                ->description($requests ? __('Soumises par des citoyens') : __('Rien en attente'))
-                ->icon('heroicon-o-document-text')->color($requests ? 'warning' : 'success')
-                ->url(\App\Filament\Admin\Resources\PreRequestResource::canViewAny() ? \App\Filament\Admin\Resources\PreRequestResource::getUrl() : null),
+            // Affiché seulement à qui peut décider (le secrétariat ne traite pas les dossiers).
+            ...(auth()->user()?->can('decide_requests') || auth()->user()?->isSuperAdmin() ? [
+                Stat::make(__('Pré-demandes à examiner'), $requests)
+                    ->description($requests ? __('Soumises par des citoyens') : __('Rien en attente'))
+                    ->icon('heroicon-o-document-text')->color($requests ? 'warning' : 'success')
+                    ->url(\App\Filament\Admin\Resources\PreRequestResource::canViewAny() ? \App\Filament\Admin\Resources\PreRequestResource::getUrl() : null),
+            ] : []),
             Stat::make(__('Comptes citoyens à valider'), $accounts)
                 ->description($accounts ? __('Vérification de résidence') : __('Rien en attente'))
                 ->icon('heroicon-o-user-plus')->color($accounts ? 'warning' : 'success')

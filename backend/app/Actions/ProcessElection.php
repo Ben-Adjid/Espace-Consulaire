@@ -201,9 +201,16 @@ class ProcessElection
             'citizen_id' => $r->candidate->citizen_id,
         ])->values()->all();
 
-        // Postes vacants : des candidats, mais aucune voix. Une élection partielle ciblée est ouverte (une seule fois).
-        $vacant = AssociationElectionResult::where('election_id', $e->id)->orderByDesc('round')->get()
-            ->unique('role')->where('status', 'vacant')->pluck('role')->values()->all();
+        // Postes vacants : tout poste de la portée de l'élection qui n'a pas d'élu, qu'il ait eu des candidats
+        // sans voix (« vacant ») ou aucun candidat du tout. Sinon le poste disparaîtrait sans successeur.
+        $scope = $e->is_partial
+            ? array_values((array) ($e->scope_roles ?? []))
+            : array_keys(\App\Models\Association::ROLES);
+        $vacant = array_values(array_unique(array_merge(
+            AssociationElectionResult::where('election_id', $e->id)->orderByDesc('round')->get()
+                ->unique('role')->where('status', 'vacant')->pluck('role')->values()->all(),
+            array_diff($scope, $final->pluck('role')->all()),
+        )));
 
         $heldOn = now()->toDateString();
         $e->update(['held_on' => $heldOn, 'proclaimed_at' => now(), 'processed_at' => now()]);

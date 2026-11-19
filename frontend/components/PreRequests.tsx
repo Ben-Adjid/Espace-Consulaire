@@ -277,6 +277,7 @@ export function PreRequestEditor({ consulateSlug, lang, base, id }: { consulateS
         <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between">
           <Link href={`${base}/compte/demandes`} className="btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50">← {t(lang, 'btn_back')}</Link>
           <Link href={`${base}/compte/messages?demande=${id}`} className="text-sm font-semibold text-brand underline">{t(lang, 'msg_ask_about_request')}</Link>
+          {req.documents.length === 0 && <p className="w-full text-sm text-slate-600">{t(lang, 'pre_submit_hint')}</p>}
           <button type="button" disabled={busy || req.documents.length === 0} onClick={submit} className="btn-primary px-6 py-2.5">{t(lang, 'pre_submit')}</button>
         </div>
       )}

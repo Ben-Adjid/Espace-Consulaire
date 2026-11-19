@@ -121,6 +121,8 @@ export default function BookingWizard({ consulateSlug, lang, base, services, pre
     setSuggested(null);
     if (!consent) {
       setError(t(lang, 'consent'));
+      // Le message est en haut de l'assistant : on le ramène à l'écran pour que le citoyen le voie.
+      setTimeout(() => document.querySelector('[role="alert"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 0);
       return;
     }
     setSubmitting(true);
@@ -379,7 +381,7 @@ export default function BookingWizard({ consulateSlug, lang, base, services, pre
           </dl>
 
           <label className="flex items-start gap-3 text-sm text-slate-700">
-            <input type="checkbox" className="mt-1 size-4" checked={consent} onChange={(e) => setConsent(e.target.checked)} required />
+            <input type="checkbox" className="mt-1 size-4" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
             <span>{t(lang, 'consent')}</span>
           </label>
 

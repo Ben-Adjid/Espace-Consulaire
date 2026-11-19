@@ -60,7 +60,7 @@ return [
 
     'fees' => [
         'passeport' => '75 000 FCFA',
-        'carte-consulaire' => '20 000 FCFA',
+        'carte-consulaire' => '2 000 FCFA (papier) · 5 000 FCFA (numérique)',
         'visa' => '55 000 FCFA',
         'legalisation-documents' => '6 000 FCFA / doc.',
         'actes-etat-civil' => '12 000 FCFA',

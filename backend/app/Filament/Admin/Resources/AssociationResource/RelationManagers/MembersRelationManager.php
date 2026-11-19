@@ -51,7 +51,7 @@ class MembersRelationManager extends RelationManager
                 Tables\Filters\SelectFilter::make('category')->label(__('Catégorie'))->options(AssociationMember::CATEGORIES),
                 Tables\Filters\SelectFilter::make('status')->label(__('Statut'))->options(AssociationMember::STATUSES),
             ])
-            ->headerActions([Tables\Actions\CreateAction::make()->label(__('Inscrire un membre'))])
+            ->headerActions([Tables\Actions\CreateAction::make()->label(__('Inscrire un membre'))->closeModalByClickingAway(false)])
             ->actions([Tables\Actions\EditAction::make(), Tables\Actions\DeleteAction::make()]);
     }
 }
