@@ -7,6 +7,7 @@ use App\Exceptions\BookingException;
 use App\Mail\AppointmentConfirmation;
 use App\Models\Appointment;
 use App\Models\Consulate;
+use App\Models\PreRequest;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Services\AvailabilityService;
@@ -52,7 +53,9 @@ class CreateAppointment
             throw BookingException::invalid();
         }
 
-        $appointment = DB::transaction(function () use ($consulate, $service, $slot, $date, $data, $locale) {
+        $preRequest = $this->resolvePreRequest($consulate, $service, $data);
+
+        $appointment = DB::transaction(function () use ($consulate, $service, $slot, $date, $data, $locale, $preRequest) {
             $locked = TimeSlot::withoutGlobalScopes()->whereKey($slot->id)->lockForUpdate()->firstOrFail();
 
             $occupied = Appointment::withoutGlobalScopes()
@@ -79,6 +82,12 @@ class CreateAppointment
                 'full_name' => $data['full_name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'],
+                'citizen_id' => $data['citizen_id'] ?? null,
+                'pre_request_id' => $preRequest?->id,
+                'on_behalf_name' => $data['on_behalf_name'] ?? null,
+                'on_behalf_relation' => $data['on_behalf_relation'] ?? null,
+                'residence_country' => $data['residence_country'] ?? null,
+                'nationality_declared' => (bool) ($data['nationality_declared'] ?? false),
                 'notes' => $data['notes'] ?? null,
                 'status' => AppointmentStatus::Pending,
                 'locale' => $locale,
@@ -90,6 +99,48 @@ class CreateAppointment
         $this->sendConfirmation($appointment);
 
         return $appointment;
+    }
+
+    /**
+     * Dossier en ligne de la démarche, rattaché au rendez-vous.
+     * - Rattachement explicite (pre_request_id) : le dossier doit appartenir au citoyen, au même consulat et au même service,
+     *   et être VALIDÉ. Sinon refus.
+     * - Sans rattachement explicite : le dernier dossier validé pour ce service est rattaché automatiquement.
+     *   S'il n'y en a pas, le rendez-vous reste possible : le guichet verra que le dossier n'est pas validé.
+     * Un visiteur sans compte n'a pas de dossier.
+     */
+    private function resolvePreRequest(Consulate $consulate, Service $service, array $data): ?PreRequest
+    {
+        $citizenId = $data['citizen_id'] ?? null;
+        if (! $citizenId) {
+            return null;
+        }
+
+        $base = PreRequest::withoutGlobalScopes()
+            ->where('citizen_id', $citizenId)
+            ->where('consulate_id', $consulate->id)
+            ->where('service_id', $service->id);
+
+        if (! empty($data['pre_request_id'])) {
+            $explicit = (clone $base)->whereKey((int) $data['pre_request_id'])->first();
+            if (! $explicit) {
+                throw BookingException::preRequestNotFound();
+            }
+            if ($explicit->status !== 'validated') {
+                throw BookingException::preRequestNotValidated();
+            }
+
+            return $explicit;
+        }
+
+        $validated = (clone $base)->where('status', 'validated')->latest('reviewed_at')->first();
+
+        // Règle du service : certains services ne se traitent qu'à partir d'un dossier validé.
+        if ($validated === null && $service->requires_validated_file) {
+            throw BookingException::preRequestRequired();
+        }
+
+        return $validated;
     }
 
     /** L'échec d'envoi d'email ne doit jamais annuler un rendez-vous déjà enregistré. */

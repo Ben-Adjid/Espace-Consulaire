@@ -19,7 +19,11 @@ class ServiceResource extends JsonResource
             'summary' => $s->summary,
             'description' => $s->description,
             'documents' => $s->documentsList(),
-            'fee' => $s->fee,
+            // Pièces avec leurs conditions (mineur/majeur, première demande/renouvellement).
+            'document_items' => $s->documentItems(),
+            // Tarif en vigueur aujourd'hui, avec sa base légale (historique géré dans l'admin).
+            'fee' => ($feeNow = $s->feeOn()) ? $feeNow->label() : $s->fee,
+            'fee_legal_reference' => $feeNow?->legal_reference,
             'processing_time' => $s->processing_time,
             'icon' => $s->icon,
             'allow_appointment' => (bool) $s->allow_appointment,

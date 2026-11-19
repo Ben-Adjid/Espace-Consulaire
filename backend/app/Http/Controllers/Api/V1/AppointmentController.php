@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\CancelAppointment;
 use App\Actions\CreateAppointment;
+use App\Actions\RescheduleAppointment;
 use App\Exceptions\BookingException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
+use App\Models\Citizen;
+use App\Models\Consulate;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Services\AvailabilityService;
@@ -61,6 +64,44 @@ class AppointmentController extends Controller
         }
 
         $consulate = $context->require();
+
+        // Compte citoyen obligatoire : la réservation est rattachée au compte, actif et du même consulat.
+        $citizen = $request->user('sanctum');
+        if (! $citizen instanceof Citizen) {
+            return response()->json(['message' => __('Créez votre compte et connectez-vous pour prendre rendez-vous.')], 401);
+        }
+        if ($citizen->consulate_id !== $consulate->id) {
+            return response()->json(['message' => __('Ce compte n’est pas rattaché à ce consulat.')], 403);
+        }
+        if (! $citizen->isActive()) {
+            return response()->json(['message' => __('Votre compte doit être validé par le consulat avant de prendre rendez-vous.')], 403);
+        }
+
+        // Rattachement par pays de résidence : c'est le pays du compte, validé par le consulat.
+        $declared = trim((string) $request->input('residence_country'));
+        if ($declared !== '' && Consulate::countryKey($declared) !== Consulate::countryKey($citizen->residence_country)) {
+            return response()->json([
+                'message' => __('Ce pays ne correspond pas à votre compte. Votre pays de résidence validé est :country.', ['country' => $citizen->residence_country]),
+                'errors' => ['residence_country' => [__('Pays de résidence différent de celui du compte.')]],
+            ], 422);
+        }
+        $residence = $citizen->residence_country;
+        if (! $consulate->covers($residence)) {
+            $suggested = Consulate::query()
+                ->where('is_active', true)
+                ->where('id', '!=', $consulate->id)
+                ->get()
+                ->first(fn (Consulate $c) => $c->representedKey() === $consulate->representedKey() && $c->covers($residence));
+
+            return response()->json([
+                'message' => $suggested
+                    ? __('Votre pays de résidence est rattaché au consulat :name. Veuillez réserver là-bas.', ['name' => $suggested->name])
+                    : __('Aucun consulat en ligne ne couvre encore votre pays de résidence.'),
+                'errors' => ['residence_country' => [__('Pays de résidence non couvert par ce consulat.')]],
+                'suggested_consulate' => $suggested ? ['slug' => $suggested->slug, 'name' => $suggested->name] : null,
+            ], 422);
+        }
+
         $service = Service::withoutGlobalScopes()
             ->where('consulate_id', $consulate->id)->where('slug', $request->input('service'))
             ->where('is_active', true)->where('allow_appointment', true)->first();
@@ -77,11 +118,17 @@ class AppointmentController extends Controller
                 $slot,
                 Carbon::createFromFormat('Y-m-d', $request->input('date'))->startOfDay(),
                 [
-                    'full_name' => trim($request->input('full_name')),
-                    'email' => trim($request->input('email')),
-                    'phone' => trim($request->input('phone')),
+                    'full_name' => $citizen->full_name,
+                    'email' => $citizen->email,
+                    'phone' => $citizen->phone,
                     'notes' => trim((string) $request->input('notes')) ?: null,
                     'consent' => $request->boolean('consent'),
+                    'residence_country' => $residence,
+                    'nationality_declared' => true,
+                    'citizen_id' => $citizen->id,
+                    'pre_request_id' => $request->integer('pre_request_id') ?: null,
+                    'on_behalf_name' => trim((string) $request->input('on_behalf_name')) ?: null,
+                    'on_behalf_relation' => $request->input('on_behalf_name') ? $request->input('on_behalf_relation') : null,
                 ],
                 app()->getLocale(),
             );
@@ -139,12 +186,12 @@ class AppointmentController extends Controller
         $location = str_replace(["\n", ',', ';'], [' ', '\\,', '\\;'], (string) $consulate->address);
 
         $ics = implode("\r\n", [
-            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Consulat Demo//FR', 'BEGIN:VEVENT',
-            'UID:'.$appointment->reference.'@consulat-demo.test',
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Consulat//FR', 'BEGIN:VEVENT',
+            'UID:'.$appointment->reference.'@consulat',
             'DTSTAMP:'.now()->format('Ymd\THis\Z'),
             'DTSTART:'.$start, 'DTEND:'.$end,
             'SUMMARY:'.$summary, 'LOCATION:'.$location,
-            'DESCRIPTION:Démo / maquette non officielle. Pensez à apporter vos documents.',
+            'DESCRIPTION:Pensez à apporter vos documents.',
             'END:VEVENT', 'END:VCALENDAR',
         ]);
 
@@ -163,9 +210,49 @@ class AppointmentController extends Controller
     }
 
     /** Renvoie le rendez-vous si le jeton est valide, sinon une réponse 404 générique. */
+    /** Déplacement : POST /v1/{consulate}/appointments/{reference}/reschedule?token=… (body: date, slot_id) */
+    public function reschedule(Request $request, ConsulateContext $context, RescheduleAppointment $reschedule, string $reference): AppointmentResource|JsonResponse
+    {
+        $request->validate([
+            'date' => ['required', 'date_format:Y-m-d'],
+            'slot_id' => ['required', 'integer'],
+        ]);
+
+        $appointment = $this->findWithToken($request, $context, $reference);
+        if (! $appointment instanceof Appointment) {
+            return $appointment;
+        }
+
+        $slot = TimeSlot::withoutGlobalScopes()
+            ->where('consulate_id', $appointment->consulate_id)
+            ->find($request->input('slot_id'));
+
+        if (! $slot) {
+            return response()->json(['message' => __('Ce créneau n’est pas disponible pour le service ou la date choisis.')], 422);
+        }
+
+        try {
+            $updated = $reschedule->execute(
+                $appointment->load('service'),
+                $slot,
+                Carbon::createFromFormat('Y-m-d', $request->input('date'))->startOfDay(),
+            );
+        } catch (BookingException $e) {
+            return response()->json(['message' => __($e->translationKey)], 422);
+        }
+
+        return new AppointmentResource($updated->load('service'));
+    }
+
     private function findWithToken(Request $request, ConsulateContext $context, string $reference): Appointment|JsonResponse
     {
         $appointment = $context->require()->appointments()->where('reference', $reference)->first();
+
+        // Le titulaire du compte peut gérer ses rendez-vous sans lien personnel.
+        $owner = $request->user('sanctum');
+        if ($appointment && $owner instanceof Citizen && $appointment->citizen_id === $owner->id) {
+            return $appointment;
+        }
 
         $token = $request->bearerToken() ?? (string) $request->query('token');
 

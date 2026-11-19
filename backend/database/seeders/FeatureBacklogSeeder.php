@@ -22,6 +22,12 @@ class FeatureBacklogSeeder extends Seeder
             'Limiteur de débit unifié',
             'Fuseau horaire explicite',
             'Cache des pages légales',
+            // Livrés depuis : replanification, double authentification, tableaux de bord par rôle, pré-demandes, suivi de dossier.
+            'Modification de rendez-vous en ligne',
+            'Authentification à deux facteurs pour l\'admin',
+            'Statistiques dans le tableau de bord',
+            'V2 — Pré-demande en ligne avec upload de documents',
+            'V2 — Suivi de dossier',
         ];
 
         foreach ($this->items() as $item) {

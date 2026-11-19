@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import HtmlAttributes from '@/components/HtmlAttributes';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import ChatBot from '@/components/ChatBot';
 import { dirOf, t } from '@/lib/i18n';
 import { baseOf, loadConsulate, loadLegalPages } from '@/lib/server';
 import type { Lang } from '@/lib/types';
@@ -51,6 +52,7 @@ export default async function ConsulateLayout({ children, params }: { children: 
       <SiteHeader consulate={consulate} lang={lang} base={base} />
       <main id="main" className="flex-1">{children}</main>
       <SiteFooter consulate={consulate} lang={lang} base={base} pages={pages} />
+      <ChatBot consulate={consulate} consulateSlug={consulate.slug} lang={lang} base={base} />
     </div>
   );
 }

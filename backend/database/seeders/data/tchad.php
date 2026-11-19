@@ -26,6 +26,8 @@ return [
         'name' => ['fr' => 'Consulat du Tchad au Sénégal', 'en' => 'Consulate of Chad in Senegal', 'ar' => 'قنصلية تشاد في السنغال'],
         'represented_country' => ['fr' => 'Tchad', 'en' => 'Chad', 'ar' => 'تشاد'],
         'host_country' => ['fr' => 'Sénégal', 'en' => 'Senegal', 'ar' => 'السنغال'],
+        // Citoyens résidant dans ces pays rattachés à ce consulat (démo : seul le Sénégal est couvert).
+        'covered_countries' => ['Sénégal'],
         'address' => [
             'fr' => "12 rue Exemple, Plateau\nDakar, Sénégal (adresse fictive)",
             'en' => "12 Example Street, Plateau\nDakar, Senegal (fictitious address)",

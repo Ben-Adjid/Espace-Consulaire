@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [SecurityHeaders::class]);
         $middleware->api(append: [SecurityHeaders::class]);
+        // Routes protégées hors Filament (pièces, reçus, export) : un visiteur non connecté va à la connexion
+        // de l'administration (il n'existe pas de route nommée « login ») ; une requête JSON reçoit un 401.
+        $middleware->redirectGuestsTo(fn ($request) => $request->expectsJson() ? null : route('filament.admin.auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -3,9 +3,13 @@ import { loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import type { Faq } from '@/lib/types';
 import FaqSearch from '@/components/FaqSearch';
+import { pageTitle } from '@/lib/pageTitles';
 export const instant = false;
 
-export const metadata = { title: 'Questions fréquentes' };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  return { title: pageTitle(lang, 'Questions fréquentes') };
+}
 
 export default async function FaqPage({ params }: { params: Promise<{ consulate: string; lang: string }> }) {
   const { consulate: slug, lang: rawLang } = await params;

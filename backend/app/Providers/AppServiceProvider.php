@@ -42,9 +42,23 @@ class AppServiceProvider extends ServiceProvider
             Service::class,
             TimeSlot::class,
             User::class,
+            // Journal d'audit étendu : validation des comptes, abonnements, association.
+            \App\Models\Citizen::class,
+            \App\Models\ConsulatePayment::class,
+            \App\Models\ConsularReceipt::class,
+            \App\Models\CitizenReport::class,
+            \App\Models\Association::class,
+            \App\Models\AssociationOfficer::class,
+            \App\Models\AssociationMember::class,
+            \App\Models\AssociationElection::class,
+            \App\Models\AssociationCandidate::class,
+            \App\Models\AssociationPostRule::class,
         ] as $model) {
             $model::observe(AdminActivityObserver::class);
         }
+
+        // Fermeture enregistrée : alerte aux citoyens dont le rendez-vous tombe ce jour-là.
+        \App\Models\ClosedDate::observe(\App\Observers\ClosedDateObserver::class);
 
         // Le super_admin peut tout faire (court-circuite les policies).
         Gate::before(fn (User $user) => $user->isSuperAdmin() ? true : null);

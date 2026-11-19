@@ -23,6 +23,11 @@ class BookingRequest extends FormRequest
             'phone' => ['required', 'string', 'regex:/^[0-9+().\s-]{6,32}$/'],
             'notes' => ['nullable', 'string', 'max:500'],
             'consent' => ['accepted'],
+            'nationality' => ['accepted'],
+            'residence_country' => ['required', 'string', 'max:80'],
+            // Procuration : rendez-vous pris pour une autre personne (enfant mineur, mandant…).
+            'on_behalf_name' => ['nullable', 'string', 'min:2', 'max:120'],
+            'on_behalf_relation' => ['nullable', 'required_with:on_behalf_name', 'in:child,spouse,parent,mandate,other'],
             'website' => ['nullable', 'string'],
         ];
     }

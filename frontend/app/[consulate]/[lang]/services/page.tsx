@@ -3,9 +3,13 @@ import { api } from '@/lib/api';
 import { baseOf, loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import type { Service } from '@/lib/types';
+import { pageTitle } from '@/lib/pageTitles';
 export const instant = false;
 
-export const metadata = { title: 'Services consulaires' };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  return { title: pageTitle(lang, 'Services consulaires') };
+}
 
 export default async function ServicesPage({ params }: { params: Promise<{ consulate: string; lang: string }> }) {
   const { consulate: slug, lang: rawLang } = await params;

@@ -14,13 +14,17 @@ use Filament\Tables\Table;
 
 class FaqResource extends Resource
 {
+    use \App\Filament\Concerns\TranslatedResourceLabels;
+
     use HasConsulateField, Translatable;
 
     protected static ?string $model = Faq::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
 
-    protected static ?string $navigationGroup = 'Contenu';
+    protected static ?string $navigationLabel = 'Questions fréquentes';
+
+    protected static ?string $navigationGroup = 'Communication';
 
     protected static ?string $modelLabel = 'question FAQ';
 
@@ -33,10 +37,10 @@ class FaqResource extends Resource
         return $form->schema([
             Forms\Components\Section::make()->columns(2)->schema([
                 static::consulateField(),
-                Forms\Components\TextInput::make('question')->label('Question')->required()->maxLength(255)->columnSpanFull(),
-                Forms\Components\Textarea::make('answer')->label('Réponse')->required()->rows(6)->columnSpanFull(),
-                Forms\Components\TextInput::make('sort_order')->label('Ordre')->numeric()->default(0),
-                Forms\Components\Toggle::make('is_published')->label('Publiée')->default(true),
+                Forms\Components\TextInput::make('question')->label(__('Question'))->required()->maxLength(255)->columnSpanFull(),
+                Forms\Components\Textarea::make('answer')->label(__('Réponse'))->required()->rows(6)->columnSpanFull(),
+                Forms\Components\TextInput::make('sort_order')->label(__('Ordre'))->numeric()->default(0),
+                Forms\Components\Toggle::make('is_published')->label(__('Publiée'))->default(true),
             ]),
         ]);
     }
@@ -44,11 +48,11 @@ class FaqResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->defaultSort('sort_order')->columns([
-            Tables\Columns\TextColumn::make('question')->label('Question')->searchable()->limit(80),
-            Tables\Columns\TextColumn::make('consulate.slug')->label('Consulat')->badge()
+            Tables\Columns\TextColumn::make('question')->label(__('Question'))->searchable()->limit(80),
+            Tables\Columns\TextColumn::make('consulate.slug')->label(__('Consulat'))->badge()
                 ->visible(fn () => auth()->user()?->isSuperAdmin()),
-            Tables\Columns\TextColumn::make('sort_order')->label('Ordre')->sortable(),
-            Tables\Columns\IconColumn::make('is_published')->label('Publiée')->boolean(),
+            Tables\Columns\TextColumn::make('sort_order')->label(__('Ordre'))->sortable(),
+            Tables\Columns\IconColumn::make('is_published')->label(__('Publiée'))->boolean(),
         ])->actions([
             Tables\Actions\EditAction::make(),
             Tables\Actions\DeleteAction::make(),

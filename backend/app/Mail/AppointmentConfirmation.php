@@ -15,6 +15,8 @@ class AppointmentConfirmation extends Mailable
 
     public function __construct(public Appointment $appointment)
     {
+        // Langue du destinataire : sujet et contenu rendus dans sa langue (fr, en, ar).
+        $this->locale(in_array($appointment->locale, ['fr', 'en', 'ar'], true) ? $appointment->locale : 'fr');
     }
 
     public function envelope(): Envelope

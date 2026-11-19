@@ -12,6 +12,11 @@ class UpcomingAppointmentsWidget extends TableWidget
 {
     protected static ?string $heading = 'Prochains rendez-vous';
 
+    protected function getTableHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        return __(static::$heading);
+    }
+
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = 'full';
@@ -28,13 +33,13 @@ class UpcomingAppointmentsWidget extends TableWidget
             )
             ->paginated([5])
             ->columns([
-                Tables\Columns\TextColumn::make('appointment_date')->label('Date')->date('d/m/Y'),
-                Tables\Columns\TextColumn::make('start_time')->label('Heure')
+                Tables\Columns\TextColumn::make('appointment_date')->label(__('Date'))->date('d/m/Y'),
+                Tables\Columns\TextColumn::make('start_time')->label(__('Heure'))
                     ->formatStateUsing(fn ($state) => substr((string) $state, 0, 5)),
-                Tables\Columns\TextColumn::make('service.name')->label('Service'),
-                Tables\Columns\TextColumn::make('full_name')->label('Demandeur'),
-                Tables\Columns\TextColumn::make('reference')->label('Référence'),
-                Tables\Columns\TextColumn::make('status')->label('Statut')->badge(),
+                Tables\Columns\TextColumn::make('service.name')->label(__('Service')),
+                Tables\Columns\TextColumn::make('full_name')->label(__('Demandeur')),
+                Tables\Columns\TextColumn::make('reference')->label(__('Référence')),
+                Tables\Columns\TextColumn::make('status')->label(__('Statut'))->badge(),
             ]);
     }
 }

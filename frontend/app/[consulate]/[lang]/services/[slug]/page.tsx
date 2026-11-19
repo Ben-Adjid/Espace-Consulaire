@@ -45,7 +45,7 @@ export default async function ServicePage({ params }: { params: Promise<{ consul
             <section>
               <h2 className="section-title mb-3 text-xl">{t(lang, 'documents_required')}</h2>
               <p className="mb-3 text-sm text-slate-500">{t(lang, 'documents_hint')}</p>
-              <DocumentChecklist items={service.documents} lang={lang} />
+              <DocumentChecklist items={service.documents} detailed={service.document_items} lang={lang} />
             </section>
           )}
         </div>

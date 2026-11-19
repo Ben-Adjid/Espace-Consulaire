@@ -20,6 +20,18 @@ export default async function Home({ params }: { params: Promise<{ consulate: st
   const services = servicesResult.status === 'fulfilled' ? servicesResult.value.data : [];
   const news = newsResult.status === 'fulfilled' ? newsResult.value.data : [];
 
+  // Premier jour réservable pour le premier service ouvert aux rendez-vous (aucune heure figée dans le texte).
+  const bookable = services.find((s) => s.allow_appointment);
+  const nextSlot = bookable
+    ? await api<{ data: string[] }>(`/${slug}/availability/dates`, { lang, query: { service: bookable.slug }, revalidate: 60 })
+        .then((r) => r.data[0] ?? null)
+        .catch(() => null)
+    : null;
+  const nextSlotLabel = nextSlot
+    ? new Date(`${nextSlot}T12:00:00`).toLocaleDateString(lang === 'ar' ? 'ar' : lang === 'en' ? 'en-GB' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+    : null;
+  const beforeVisit = services.filter((s) => s.documents?.length || s.fee || s.processing_time).slice(0, 3);
+
   return (
     <>
       <section className="relative isolate overflow-hidden text-white" style={{ background: `linear-gradient(125deg, var(--brand), color-mix(in srgb, var(--brand) 72%, #101827))` }}>
@@ -81,6 +93,20 @@ export default async function Home({ params }: { params: Promise<{ consulate: st
               <p className="border-t border-white/15 pt-4 text-xs leading-5 text-white/55">{t(lang, 'service_info_note')}</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Prochain créneau : l'information que le citoyen cherche en premier */}
+      <section className="mx-auto w-full max-w-7xl px-5 pt-10 sm:px-8">
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex items-center gap-4">
+            <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg text-brand" style={{ backgroundColor: 'color-mix(in srgb, var(--brand) 10%, white)' }}>📅</span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand">{t(lang, 'next_slot')}</p>
+              <p className="mt-1 font-semibold text-slate-900">{nextSlotLabel ?? t(lang, 'no_slot_now')}</p>
+            </div>
+          </div>
+          <Link href={`${base}/appointment`} className="btn-primary px-5 py-2.5 text-center">{t(lang, 'book')} →</Link>
         </div>
       </section>
 
@@ -176,6 +202,34 @@ export default async function Home({ params }: { params: Promise<{ consulate: st
           <OsmMap consulate={consulate} lang={lang} />
         </div>
       </section>
+
+      {/* Avant de venir : pièces, frais et délai, pour éviter un aller-retour inutile */}
+      {beforeVisit.length > 0 && (
+        <section className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
+          <div className="mb-7">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand">{t(lang, 'practical_info')}</p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{t(lang, 'before_visit')}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{t(lang, 'before_visit_help')}</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {beforeVisit.map((s) => (
+              <article key={s.slug} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h3 className="font-semibold text-slate-900">{s.name}</h3>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                  {s.fee && (<div><dt className="font-semibold uppercase tracking-wide text-slate-500">{t(lang, 'fee_label')}</dt><dd className="text-sm text-slate-900">{s.fee}</dd></div>)}
+                  {s.processing_time && (<div><dt className="font-semibold uppercase tracking-wide text-slate-500">{t(lang, 'delay_label')}</dt><dd className="text-sm text-slate-900">{s.processing_time}</dd></div>)}
+                </dl>
+                {s.documents?.length > 0 && (
+                  <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-slate-600">
+                    {s.documents.slice(0, 4).map((d) => <li key={d}>{d}</li>)}
+                    {s.documents.length > 4 && <li className="list-none text-xs text-slate-500">+ {s.documents.length - 4}</li>}
+                  </ul>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="bg-white py-14 sm:py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">

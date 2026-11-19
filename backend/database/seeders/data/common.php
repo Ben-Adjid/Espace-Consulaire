@@ -24,9 +24,9 @@ return [
                 'ar' => "تستقبل القنصلية طلبات جواز السفر العادي من المواطنين المقيمين في {h}.\n\nيجب حضور صاحب الطلب لأخذ البيانات البيومترية. ويجب أن يرافق القاصرَ أحدُ والديه.",
             ],
             'documents' => [
-                'fr' => "Formulaire de demande dûment rempli\nActe de naissance (copie intégrale)\nAncien passeport (en cas de renouvellement)\nCarte de résident ou titre de séjour au {h}\n2 photos d'identité récentes (fond blanc)\nJustificatif de domicile de moins de 3 mois\nQuittance de paiement des frais",
-                'en' => "Completed application form\nBirth certificate (full copy)\nOld passport (for renewals)\nResidence card or residence permit in {h}\n2 recent passport photos (white background)\nProof of address less than 3 months old\nPayment receipt",
-                'ar' => "استمارة الطلب مملوءة\nشهادة الميلاد (نسخة كاملة)\nجواز السفر القديم (عند التجديد)\nبطاقة الإقامة أو رخصة الإقامة في {h}\nصورتان شخصيتان حديثتان (خلفية بيضاء)\nإثبات السكن لا يتجاوز 3 أشهر\nوصل دفع الرسوم",
+                'fr' => "Formulaire de demande dûment rempli\nActe de naissance (copie intégrale)\n[renouvellement] Ancien passeport\n[premiere] Carte nationale d'identité tchadienne ou certificat de nationalité\n[mineur] Autorisation parentale signée et pièce d'identité du parent\nCarte de résident ou titre de séjour au {h}\n2 photos d'identité récentes (fond blanc)\nJustificatif de domicile de moins de 3 mois\nQuittance de paiement des frais",
+                'en' => "Completed application form\nBirth certificate (full copy)\n[renewal] Old passport\n[first] Chadian national ID card or certificate of nationality\n[minor] Signed parental authorisation and the parent's ID\nResidence card or residence permit in {h}\n2 recent passport photos (white background)\nProof of address less than 3 months old\nPayment receipt",
+                'ar' => "استمارة الطلب مملوءة\nشهادة الميلاد (نسخة كاملة)\n[renewal] جواز السفر القديم\n[first] بطاقة الهوية الوطنية التشادية أو شهادة الجنسية\n[minor] إذن أبوي موقّع وبطاقة هوية الوالد\nبطاقة الإقامة أو رخصة الإقامة في {h}\nصورتان شخصيتان حديثتان (خلفية بيضاء)\nإثبات السكن لا يتجاوز 3 أشهر\nوصل دفع الرسوم",
             ],
             'delay' => ['fr' => '4 à 6 semaines', 'en' => '4 to 6 weeks', 'ar' => 'من 4 إلى 6 أسابيع'],
         ],

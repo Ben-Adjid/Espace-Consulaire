@@ -1,9 +1,13 @@
 import { loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import ContactForm from '@/components/ContactForm';
+import { pageTitle } from '@/lib/pageTitles';
 export const instant = false;
 
-export const metadata = { title: 'Contact' };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  return { title: pageTitle(lang, 'Contact') };
+}
 
 export default async function ContactPage({ params }: { params: Promise<{ consulate: string; lang: string }> }) {
   const { consulate: slug, lang: rawLang } = await params;

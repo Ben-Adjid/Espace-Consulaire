@@ -100,12 +100,12 @@ php -m | Select-String intl
 | Sitemap / robots | http://localhost:3000/sitemap.xml · `/robots.txt` |
 
 ## Comptes de démo
-
+superadmin@demo.test
 Mot de passe commun : **`Demo#Consulat2026`** (modifiable via `DEMO_PASSWORD` dans `.env`, avant le seed).
 
 | Rôle | Email | Accès |
 |---|---|---|
-| super_admin | `superadmin@demo.test` | tous les consulats, création de consulats |
+| super_admin | `` | tous les consulats, création de consulats |
 | consulate_admin (Tchad) | `admin.tchad@demo.test` | contenus, rendez-vous, messages, utilisateurs et fiche du Tchad |
 | staff (Tchad) | `staff.tchad@demo.test` | rendez-vous et messages, lecture des contenus |
 | consulate_admin (Cameroun) | `admin.cameroun@demo.test` | idem pour le Cameroun |
@@ -149,3 +149,16 @@ Voir [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 - Pas encore de double authentification admin ni de tests de bout en bout navigateur.
 - Les rendez-vous peuvent être annulés par lien personnel; le visiteur ne peut pas encore les replanifier.
 - Pas de paiement ni de pré-demande en ligne : voir [docs/ROADMAP_V2.md](docs/ROADMAP_V2.md).
+
+
+CEGJC-DRFOY
+S5WSH-GSLYF
+VTQTR-EJSXU
+MMIDX-O8EO4
+JURKZ-WGMQ1
+BPKMV-RHRGC
+DDLYO-JECS0
+UIPHU-18ZWX
+
+
+tu sais le consulat ne signe pas le  contrat au moment au mois donc d'autre en plein ,d'autre au debut,au milieu,ou a la fin de l'année donc il faut repense a comment gere ça leurs reglès sur l'abonnement,cote securite, bref tout de A-Z

@@ -14,6 +14,7 @@ class ListConsulates extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [Actions\LocaleSwitcher::make(), Actions\CreateAction::make()];
+        // Pas de bouton « Créer » ici : la création passe par la page guidée « Nouveau consulat ».
+        return [Actions\LocaleSwitcher::make()];
     }
 }

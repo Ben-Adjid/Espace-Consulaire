@@ -27,6 +27,21 @@ export default function SiteHeader({ consulate, lang, base }: Omit<Props, 'curre
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="h-1.5" style={{ background: 'linear-gradient(90deg, var(--brand) 33.3%, var(--brand-2) 33.3% 66.6%, var(--brand-3) 66.6%)' }} />
+      <div className="border-b border-slate-100 bg-slate-50">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-1.5 text-xs font-semibold">
+          <Link href="/" className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 hover:underline" title={t(lang, 'other_consulates')}>
+            <span aria-hidden="true">←</span> {t(lang, 'choose_consulate')}
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href={`${base}/compte`} className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 hover:underline">
+              {t(lang, 'account_nav')}
+            </Link>
+            <a href={process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://127.0.0.1:8000/admin'} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 hover:underline">
+              {t(lang, 'admin_space')} <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link href={base || '/'} className="flex items-center gap-3">
           <Logo consulate={consulate} />
@@ -64,19 +79,13 @@ export default function SiteHeader({ consulate, lang, base }: Omit<Props, 'curre
                   hrefLang={code}
                   lang={code}
                   aria-label={LANG_NAMES[code]}
-                  className={`px-2.5 py-1.5 ${code === lang ? 'text-white bg-brand' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                  className={`whitespace-nowrap px-3 py-1.5 ${code === lang ? 'text-white bg-brand' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
                 >
-                  {code.toUpperCase()}
+                  {LANG_NAMES[code]}
                 </Link>
               );
             })}
           </div>
-          <Link href="/" className="hidden whitespace-nowrap text-xs font-semibold text-slate-600 hover:underline lg:inline" title={t(lang, 'other_consulates')}>
-            {t(lang, 'choose_consulate')}
-          </Link>
-          <a href={process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://127.0.0.1:8000/admin'} target="_blank" rel="noopener noreferrer" className="hidden whitespace-nowrap text-xs font-semibold text-slate-600 hover:underline xl:inline">
-            {t(lang, 'admin_space')}
-          </a>
           <Link href={`${base}/appointment`} className="btn-accent hidden px-4 py-2 text-sm sm:inline-flex">
             {t(lang, 'book')}
           </Link>

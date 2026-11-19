@@ -27,10 +27,64 @@ class Consulate extends Model
     {
         return [
             'languages' => 'array',
+            'covered_countries' => 'array',
             'is_active' => 'boolean',
             'latitude' => 'float',
             'longitude' => 'float',
+            'subscription_until' => 'date',
+            'subscription_notice_until' => 'date',
+            'suspended_for_nonpayment' => 'boolean',
         ];
+    }
+
+    /**
+     * État de l'abonnement annuel :
+     * none (pas encore démarré), active, expiring (à renouveler), grace (échu, période de grâce), suspended.
+     */
+    public function subscriptionState(): string
+    {
+        if ($this->suspended_for_nonpayment) {
+            return 'suspended';
+        }
+        if (! $this->subscription_until) {
+            return 'none';
+        }
+
+        $today = now()->startOfDay();
+        if ($this->subscription_until->lt($today)) {
+            return 'grace';
+        }
+        if ($this->subscription_until->lte($today->copy()->addDays(config('subscription.warning_days')))) {
+            return 'expiring';
+        }
+
+        return 'active';
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(ConsulatePayment::class)->latest('paid_at');
+    }
+
+    /** Clé de comparaison d'un nom de pays : minuscules, sans accents, espaces réduits. */
+    public static function countryKey(string $country): string
+    {
+        return trim(preg_replace('/\s+/', ' ', Str::lower(Str::ascii($country))));
+    }
+
+    /** Ce consulat traite-t-il les citoyens résidant dans ce pays ? */
+    public function covers(string $country): bool
+    {
+        $key = self::countryKey($country);
+
+        return collect($this->covered_countries ?? [])
+            ->contains(fn (string $c) => self::countryKey($c) === $key);
+    }
+
+    /** Clé du pays représenté : la nationalité des demandeurs de ce consulat. */
+    public function representedKey(): string
+    {
+        return self::countryKey((string) $this->getTranslation('represented_country', 'fr'));
     }
 
     protected static function booted(): void

@@ -15,12 +15,12 @@ enum AppointmentStatus: string implements HasLabel, HasColor
 
     public function getLabel(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Pending => 'En attente',
             self::Confirmed => 'Confirmé',
             self::Cancelled => 'Annulé',
             self::Completed => 'Terminé',
-        };
+        });
     }
 
     public function getColor(): string

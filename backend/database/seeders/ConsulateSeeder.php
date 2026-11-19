@@ -32,7 +32,7 @@ class ConsulateSeeder extends Seeder
     {
         $common = require database_path('seeders/data/common.php');
 
-        foreach (['tchad', 'cameroun'] as $file) {
+        foreach (['tchad', 'tchad_cameroun', 'tchad_ghana', 'tchad_togo'] as $file) {
             $data = require database_path("seeders/data/{$file}.php");
             $this->seedConsulate($data, $common);
         }

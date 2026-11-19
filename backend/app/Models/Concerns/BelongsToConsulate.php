@@ -17,7 +17,7 @@ trait BelongsToConsulate
         static::creating(function ($model) {
             $user = auth()->user();
 
-            if ($user && $user->consulate_id && ! $user->isSuperAdmin()) {
+            if ($user instanceof \App\Models\User && $user->consulate_id && ! $user->isSuperAdmin()) {
                 $model->consulate_id = $user->consulate_id;
             }
         });

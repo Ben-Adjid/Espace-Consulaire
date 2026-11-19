@@ -1,9 +1,13 @@
 import { loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import AppointmentManager from '@/components/AppointmentManager';
+import { pageTitle } from '@/lib/pageTitles';
 export const instant = false;
 
-export const metadata = { title: 'Rendez-vous enregistré' };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  return { title: pageTitle(lang, 'Rendez-vous enregistré') };
+}
 
 /**
  * Confirmation. Le jeton est dans le fragment (#token=…), lu côté navigateur uniquement :
@@ -11,7 +15,7 @@ export const metadata = { title: 'Rendez-vous enregistré' };
  */
 export default async function ConfirmationPage({ params }: { params: Promise<{ consulate: string; lang: string; ref: string }> }) {
   const { consulate: slug, lang: rawLang, ref } = await params;
-  const { lang } = await loadConsulate(slug, rawLang);
+  const { consulate, lang } = await loadConsulate(slug, rawLang);
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-12">
@@ -25,7 +29,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ c
             <p className="select-all font-mono text-2xl font-bold tracking-wider text-brand" dir="ltr">{ref}</p>
           </div>
           <p className="text-sm text-slate-600">{t(lang, 'confirmed_hint')}</p>
-          <AppointmentManager consulateSlug={slug} lang={lang} reference={ref} />
+          <AppointmentManager consulateSlug={slug} lang={lang} reference={ref} consulateName={consulate.name} />
           <p className="text-xs text-slate-500">{t(lang, 'keep_link')}</p>
         </div>
       </div>

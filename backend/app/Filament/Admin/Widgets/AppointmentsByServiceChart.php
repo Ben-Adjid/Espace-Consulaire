@@ -11,7 +11,20 @@ class AppointmentsByServiceChart extends ChartWidget
 {
     protected static ?string $heading = 'Rendez-vous par service (30 jours)';
 
+    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        return __(static::$heading);
+    }
+
     protected static ?int $sort = 3;
+
+    /** Pilotage : réservé au consul et au super administrateur ; le personnel voit le travail du jour. */
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return (bool) ($user?->isSuperAdmin() || $user?->hasRole(\App\Models\User::ROLE_CONSULATE_ADMIN));
+    }
 
     protected int|string|array $columnSpan = 'full';
 

@@ -5,7 +5,7 @@ import { isLang } from './i18n';
 import type { Consulate, Lang, PageContent } from './types';
 
 /** Pages légales affichées dans le pied de page (si publiées pour le consulat). */
-export const LEGAL_SLUGS = ['mentions-legales', 'confidentialite', 'demo-non-officielle'];
+export const LEGAL_SLUGS = ['mentions-legales', 'confidentialite'];
 
 /** Charge le consulat et valide la langue de l'URL. 404 si inconnu ou langue non proposée. */
 export async function loadConsulate(slug: string, lang: string): Promise<{ consulate: Consulate; lang: Lang }> {

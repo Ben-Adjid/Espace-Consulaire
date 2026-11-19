@@ -28,15 +28,29 @@ class Appointment extends Model
             'appointment_date' => 'date',
             'status' => AppointmentStatus::class,
             'confirmed_at' => 'datetime',
+            'checked_in_at' => 'datetime',
             'consent_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'case_status' => \App\Enums\CaseStatus::class,
+            'case_updated_at' => 'datetime',
         ];
+    }
+
+    public function consulate(): BelongsTo
+    {
+        return $this->belongsTo(Consulate::class)->withoutGlobalScopes();
     }
 
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class)->withoutGlobalScopes();
+    }
+
+    /** Pré-demande en ligne de la même démarche (validée avant le rendez-vous, ou non liée). */
+    public function preRequest(): BelongsTo
+    {
+        return $this->belongsTo(PreRequest::class)->withoutGlobalScopes();
     }
 
     public function timeSlot(): BelongsTo

@@ -18,6 +18,7 @@ class ConsulateResource extends JsonResource
             'name' => $c->name,
             'represented_country' => $c->represented_country,
             'host_country' => $c->host_country,
+            'covered_countries' => array_values($c->covered_countries ?? []),
             'consul_name' => $c->consul_name,
             'hero_title' => $c->hero_title ?: $c->name,
             'hero_subtitle' => $c->hero_subtitle,

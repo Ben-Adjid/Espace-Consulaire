@@ -30,7 +30,8 @@ class ConsulateScope implements Scope
 
         $user = auth()->user();
 
-        if (! $user || $user->isSuperAdmin()) {
+        // Seuls les administrateurs sont soumis au périmètre (les comptes citoyens ne le sont pas).
+        if (! $user instanceof \App\Models\User || $user->isSuperAdmin()) {
             return;
         }
 

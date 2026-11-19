@@ -32,7 +32,7 @@ class EditUser extends EditRecord
         $role = $this->data['role'] ?? null;
 
         if (! array_key_exists($role, UserResource::assignableRoles())) {
-            throw ValidationException::withMessages(['data.role' => 'Rôle non autorisé.']);
+            throw ValidationException::withMessages(['data.role' => __('Rôle non autorisé.')]);
         }
 
         /** @var User $user */

@@ -1,7 +1,7 @@
 import type { Consulate } from '@/lib/types';
 
 /** Logo : image téléversée, sinon logo neutre généré (bandes aux couleurs du consulat + initiales). */
-export default function Logo({ consulate, size = 44 }: { consulate: Consulate; size?: number }) {
+export default function Logo({ consulate, size = 44 }: { consulate: Pick<Consulate, 'logo_url' | 'theme' | 'initials'>; size?: number }) {
   if (consulate.logo_url) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={consulate.logo_url} alt="" width={size} height={size} className="shrink-0 rounded-lg bg-white object-contain" />;

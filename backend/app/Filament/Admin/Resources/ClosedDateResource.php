@@ -17,13 +17,17 @@ use Filament\Tables\Table;
 /** Fermetures exceptionnelles : jours fériés, travaux. Les créneaux de ces jours ne sont plus proposés. */
 class ClosedDateResource extends Resource
 {
+    use \App\Filament\Concerns\TranslatedResourceLabels;
+
     use HasConsulateField;
 
     protected static ?string $model = ClosedDate::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-no-symbol';
 
-    protected static ?string $navigationGroup = 'Rendez-vous';
+    protected static ?string $navigationLabel = 'Fermetures';
+
+    protected static ?string $navigationGroup = 'Paramétrage';
 
     protected static ?string $modelLabel = 'fermeture';
 
@@ -46,9 +50,9 @@ class ClosedDateResource extends Resource
         return $form->schema([
             Forms\Components\Section::make()->columns(2)->schema([
                 static::consulateField(),
-                Forms\Components\DatePicker::make('date')->label('Jour fermé')->required()->native(false),
-                Forms\Components\TextInput::make('label')->label('Motif')->required()->maxLength(160)
-                    ->placeholder('Fête nationale'),
+                Forms\Components\DatePicker::make('date')->label(__('Jour fermé'))->required()->native(false),
+                Forms\Components\TextInput::make('label')->label(__('Motif'))->required()->maxLength(160)
+                    ->placeholder(__('Fête nationale')),
             ]),
         ]);
     }
@@ -56,9 +60,9 @@ class ClosedDateResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->defaultSort('date')->columns([
-            Tables\Columns\TextColumn::make('date')->label('Jour')->date('d/m/Y')->sortable(),
-            Tables\Columns\TextColumn::make('label')->label('Motif')->searchable(),
-            Tables\Columns\TextColumn::make('consulate.slug')->label('Consulat')->badge()
+            Tables\Columns\TextColumn::make('date')->label(__('Jour'))->date('d/m/Y')->sortable(),
+            Tables\Columns\TextColumn::make('label')->label(__('Motif'))->searchable(),
+            Tables\Columns\TextColumn::make('consulate.slug')->label(__('Consulat'))->badge()
                 ->visible(fn () => auth()->user()?->isSuperAdmin()),
         ])->actions([
             Tables\Actions\EditAction::make(),

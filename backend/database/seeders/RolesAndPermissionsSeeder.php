@@ -26,6 +26,8 @@ class RolesAndPermissionsSeeder extends Seeder
         'edit_consulate',
         'delete_records',
         'view_dashboard',
+        'manage_receipts',      // encaissement au guichet (reçus)
+        'decide_requests',      // décisions sur les pré-demandes : examen, prise en charge, cas particuliers
     ];
 
     public function run(): void
@@ -41,6 +43,10 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::findOrCreate(User::ROLE_CONSULATE_ADMIN, 'web')->syncPermissions(self::PERMISSIONS);
 
         Role::findOrCreate(User::ROLE_STAFF, 'web')->syncPermissions([
+            'view_content', 'manage_appointments', 'manage_messages', 'view_dashboard', 'manage_receipts', 'decide_requests',
+        ]);
+        // Secrétariat : rendez-vous et messagerie uniquement. Ni encaissement, ni décision sur un dossier.
+        Role::findOrCreate(User::ROLE_SECRETARIAT, 'web')->syncPermissions([
             'view_content', 'manage_appointments', 'manage_messages', 'view_dashboard',
         ]);
 

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api;
 
 use App\Enums\AppointmentStatus;
+use App\Models\Citizen;
 use App\Models\Appointment;
 use App\Models\ClosedDate;
 use App\Models\Consulate;
@@ -13,11 +14,14 @@ use Carbon\Carbon;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /** Tests de l'API publique v1 : isolation par consulat, réservation, jeton, annulation, RGPD. */
 class PublicApiTest extends TestCase
 {
+    private Citizen $citizen;
+
     use RefreshDatabase;
 
     private Consulate $chad;
@@ -48,17 +52,33 @@ class PublicApiTest extends TestCase
             'capacity' => 2, 'is_active' => true,
         ]);
 
-        $this->date = Carbon::today()->addDays(config('booking.min_lead_days'));
+        // Une semaine de marge : l'annulation exige au moins 24 h avant le rendez-vous, quelle que soit l'heure du test.
+        $this->date = Carbon::today()->addDays(config('booking.min_lead_days') + 7);
         while ($this->date->dayOfWeek !== 1) {
             $this->date->addDay();
         }
+
+        // Par défaut, les réservations se font avec un compte citoyen actif (obligatoire).
+        $this->citizen = Citizen::withoutGlobalScopes()->create([
+            'consulate_id' => $this->chad->id, 'full_name' => 'Citoyen Test', 'email' => 'citoyen@example.test',
+            'phone' => '+221 77 111 11 11', 'password' => 'mot-de-passe-test', 'nationality' => 'Tchad',
+            'residence_country' => 'Sénégal', 'status' => Citizen::STATUS_ACTIVE,
+        ]);
+        Sanctum::actingAs($this->citizen);
+    }
+
+    /** Requête sans identité : pour tester l'accès par lien personnel. */
+    private function anonymous(): void
+    {
+        $this->app['auth']->forgetGuards();
     }
 
     private function makeConsulate(string $slug, string $prefix): Consulate
     {
         return Consulate::create([
             'slug' => $slug, 'ref_prefix' => $prefix, 'name' => ['fr' => $slug],
-            'represented_country' => ['fr' => 'Pays'], 'host_country' => ['fr' => 'Sénégal'],
+            'represented_country' => ['fr' => 'Tchad'], 'host_country' => ['fr' => 'Sénégal'],
+            'covered_countries' => ['Sénégal'],
             'languages' => ['fr', 'en', 'ar'], 'primary_color' => '#002664', 'is_active' => true,
         ]);
     }
@@ -73,6 +93,8 @@ class PublicApiTest extends TestCase
             'email' => 'visiteur@example.test',
             'phone' => '+221 77 000 00 00',
             'consent' => true,
+            'nationality' => true,
+            'residence_country' => 'Sénégal',
         ], $overrides);
     }
 
@@ -116,9 +138,25 @@ class PublicApiTest extends TestCase
         $this->assertNotNull($appointment->consent_at);
     }
 
+    public function test_booking_on_behalf_of_a_minor_child_is_recorded(): void
+    {
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload([
+            'on_behalf_name' => 'Enfant Mineur', 'on_behalf_relation' => 'child',
+        ]))->assertCreated()->assertJsonPath('data.on_behalf_name', 'Enfant Mineur');
+
+        $this->assertSame('child', Appointment::withoutGlobalScopes()->first()->on_behalf_relation);
+    }
+
+    public function test_proxy_booking_requires_the_relationship(): void
+    {
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['on_behalf_name' => 'Personne Représentée']))
+            ->assertJsonValidationErrors('on_behalf_relation');
+    }
+
     public function test_appointment_details_need_the_token(): void
     {
         $response = $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload())->assertCreated();
+        $this->anonymous();
         $ref = $response->json('reference');
         $token = $response->json('access_token');
 
@@ -169,9 +207,17 @@ class PublicApiTest extends TestCase
 
     public function test_capacity_is_enforced_through_the_api(): void
     {
-        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['email' => 'a@example.test']))->assertCreated();
-        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['email' => 'b@example.test']))->assertCreated();
-        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['email' => 'c@example.test']))->assertUnprocessable();
+        $this->slot->update(['capacity' => 1]);
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload())->assertCreated();
+
+        $second = Citizen::withoutGlobalScopes()->create([
+            'consulate_id' => $this->chad->id, 'full_name' => 'Deuxième', 'email' => 'deux@example.test',
+            'phone' => '+221 77 222 22 22', 'password' => 'mot-de-passe-test', 'nationality' => 'Tchad',
+            'residence_country' => 'Sénégal', 'status' => Citizen::STATUS_ACTIVE,
+        ]);
+        Sanctum::actingAs($second);
+
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload())->assertUnprocessable();
     }
 
     public function test_slot_of_another_consulate_is_refused(): void
@@ -293,5 +339,95 @@ class PublicApiTest extends TestCase
 
         $this->assertDatabaseMissing('contact_messages', ['subject' => 'Ancien']);
         $this->assertDatabaseHas('contact_messages', ['subject' => 'Récent']);
+    }
+
+    public function test_booking_is_refused_when_residence_is_not_covered_by_this_consulate(): void
+    {
+        $this->makeConsulate('tchad-cameroun', 'TCM');
+
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['residence_country' => 'Cameroun']))
+            ->assertStatus(422)
+            ->assertJsonPath('suggested_consulate', null)
+            ->assertJsonValidationErrors('residence_country');
+    }
+
+    public function test_registration_is_refused_outside_covered_residence_and_suggests_the_right_consulate(): void
+    {
+        $other = $this->makeConsulate('tchad-cameroun', 'TCM');
+        $other->update(['covered_countries' => ['Cameroun']]);
+        $this->anonymous();
+
+        $this->postJson('/api/v1/tchad-senegal/citizen/register', [
+            'full_name' => 'Résident Cameroun', 'email' => 'cm@example.test', 'phone' => '+237 600 000 000',
+            'password' => 'mot-de-passe-test', 'password_confirmation' => 'mot-de-passe-test',
+            'residence_country' => 'Cameroun', 'nationality' => true, 'consent' => true,
+        ])->assertStatus(422)->assertJsonPath('suggested_consulate.slug', 'tchad-cameroun');
+    }
+
+    public function test_booking_is_refused_when_declared_residence_differs_from_the_account(): void
+    {
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['residence_country' => 'Cameroun']))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('residence_country');
+    }
+
+    public function test_suggestion_only_proposes_a_consulate_of_the_same_nationality(): void
+    {
+        // Un consulat du Cameroun couvre le Cameroun : il ne doit pas être proposé à un Tchadien.
+        $cameroonConsulate = $this->makeConsulate('cameroun-cameroun', 'CMC');
+        $cameroonConsulate->update(['represented_country' => ['fr' => 'Cameroun'], 'covered_countries' => ['Cameroun']]);
+
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['residence_country' => 'Cameroun']))
+            ->assertStatus(422)
+            ->assertJsonPath('suggested_consulate', null);
+    }
+    public function test_booking_requires_the_nationality_declaration(): void
+    {
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['nationality' => false]))
+            ->assertJsonValidationErrors('nationality');
+    }
+    private function secondSlot(int $capacity = 2): TimeSlot
+    {
+        return TimeSlot::withoutGlobalScopes()->create([
+            'consulate_id' => $this->chad->id, 'weekday' => 1, 'start_time' => '11:00', 'end_time' => '12:00',
+            'capacity' => $capacity, 'is_active' => true,
+        ]);
+    }
+
+    public function test_visitor_can_move_to_another_slot_with_token(): void
+    {
+        $second = $this->secondSlot();
+        $response = $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload())->assertCreated();
+
+        $this->postJson("/api/v1/tchad-senegal/appointments/{$response->json('reference')}/reschedule?token={$response->json('access_token')}", [
+            'date' => $this->date->toDateString(),
+            'slot_id' => $second->id,
+        ])->assertOk()->assertJsonPath('data.start_time', '11:00');
+
+        $this->assertSame($second->id, Appointment::withoutGlobalScopes()->first()->time_slot_id);
+    }
+
+    public function test_reschedule_is_refused_when_target_slot_is_full(): void
+    {
+        $second = $this->secondSlot(capacity: 1);
+        $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload(['slot_id' => $second->id, 'email' => 'autre@example.test']))->assertCreated();
+
+        $response = $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload())->assertCreated();
+
+        $this->postJson("/api/v1/tchad-senegal/appointments/{$response->json('reference')}/reschedule?token={$response->json('access_token')}", [
+            'date' => $this->date->toDateString(),
+            'slot_id' => $second->id,
+        ])->assertUnprocessable();
+    }
+
+    public function test_reschedule_needs_the_access_token(): void
+    {
+        $response = $this->postJson('/api/v1/tchad-senegal/appointments', $this->payload())->assertCreated();
+        $this->anonymous();
+
+        $this->postJson("/api/v1/tchad-senegal/appointments/{$response->json('reference')}/reschedule", [
+            'date' => $this->date->toDateString(),
+            'slot_id' => $this->slot->id,
+        ])->assertNotFound();
     }
 }

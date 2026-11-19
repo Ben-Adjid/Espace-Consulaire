@@ -15,19 +15,23 @@ use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
+    use \App\Filament\Concerns\TranslatedResourceLabels;
+
     use HasConsulateField;
 
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Administration';
+    protected static ?string $navigationLabel = 'Équipe et comptes';
+
+    protected static ?string $navigationGroup = 'Paramétrage';
 
     protected static ?string $modelLabel = 'utilisateur';
 
     protected static ?string $pluralModelLabel = 'utilisateurs';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 5;
 
     /**
      * Un consulate_admin ne voit que les comptes de son consulat, sans les super_admin.
@@ -53,6 +57,7 @@ class UserResource extends Resource
             User::ROLE_SUPER_ADMIN => 'Super administrateur',
             User::ROLE_CONSULATE_ADMIN => 'Administrateur du consulat',
             User::ROLE_STAFF => 'Agent',
+            User::ROLE_SECRETARIAT => 'Secrétariat (rendez-vous et messagerie)',
         ];
 
         if (auth()->user()?->isSuperAdmin()) {
@@ -68,19 +73,20 @@ class UserResource extends Resource
     {
         return $form->schema([
             Forms\Components\Section::make()->columns(2)->schema([
-                Forms\Components\TextInput::make('name')->label('Nom')->required()->maxLength(120),
-                Forms\Components\TextInput::make('email')->label('Email')->email()->required()
+                Forms\Components\TextInput::make('name')->label(__('Nom'))->required()->maxLength(120),
+                Forms\Components\TextInput::make('email')->label(__('Email'))->email()->required()
                     ->unique(ignoreRecord: true)->maxLength(160),
-                Forms\Components\TextInput::make('password')->label('Mot de passe')->password()->revealable()
-                    ->required(fn (string $operation) => $operation === 'create')
+                Forms\Components\TextInput::make('password')->label(__('Mot de passe'))->password()->revealable()
                     ->minLength(10)
                     ->dehydrated(fn ($state) => filled($state))
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->helperText('10 caractères minimum. Laisser vide pour ne pas changer.'),
-                Forms\Components\Select::make('role')->label('Rôle')->options(fn () => static::assignableRoles())
+                    ->helperText(fn (string $operation) => $operation === 'create'
+                        ? __('Recommandé : laisser vide. La personne reçoit un lien d’activation par email et choisit elle-même son mot de passe.')
+                        : __('10 caractères minimum. Laisser vide pour ne pas changer.')),
+                Forms\Components\Select::make('role')->label(__('Rôle'))->options(fn () => static::assignableRoles())
                     ->required()->dehydrated(false)->native(false),
                 static::consulateField(),
-                Forms\Components\Toggle::make('is_active')->label('Compte actif')->default(true),
+                Forms\Components\Toggle::make('is_active')->label(__('Compte actif'))->default(true),
             ]),
         ]);
     }
@@ -88,13 +94,21 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('name')->label('Nom')->searchable(),
-            Tables\Columns\TextColumn::make('email')->label('Email')->searchable(),
-            Tables\Columns\TextColumn::make('roles.name')->label('Rôle')->badge(),
-            Tables\Columns\TextColumn::make('consulate.slug')->label('Consulat')->badge()->placeholder('—'),
-            Tables\Columns\IconColumn::make('is_active')->label('Actif')->boolean(),
+            Tables\Columns\TextColumn::make('name')->label(__('Nom'))->searchable(),
+            Tables\Columns\TextColumn::make('email')->label(__('Email'))->searchable(),
+            Tables\Columns\TextColumn::make('roles.name')->label(__('Rôle'))->badge(),
+            Tables\Columns\TextColumn::make('consulate.slug')->label(__('Consulat'))->badge()->placeholder(__('—')),
+            Tables\Columns\IconColumn::make('is_active')->label(__('Actif'))->boolean(),
         ])->actions([
             Tables\Actions\EditAction::make(),
+            // (Ré)envoi du lien d'activation : la personne choisit son mot de passe, valable 60 minutes.
+            Tables\Actions\Action::make('invite')->label(__('Envoyer le lien d’activation'))->icon('heroicon-o-envelope')->color('gray')
+                ->requiresConfirmation()
+                ->modalDescription(fn (User $r) => 'Un email avec un lien pour choisir son mot de passe sera envoyé à '.$r->email.'.')
+                ->action(function (User $r) {
+                    app(\App\Actions\SendAdminInvitation::class)->execute($r);
+                    \Filament\Notifications\Notification::make()->success()->title('Lien d’activation envoyé à '.$r->email)->send();
+                }),
             Tables\Actions\DeleteAction::make(),
         ]);
     }

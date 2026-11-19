@@ -2,6 +2,7 @@
 
 return [
     'required' => 'Le champ :attribute est obligatoire.',
+    'accepted' => 'Vous devez accepter ce champ pour continuer.',
     'string' => 'Le champ :attribute doit être un texte.',
     'email' => 'Le champ :attribute doit être une adresse email valide.',
     'integer' => 'Le champ :attribute doit être un nombre entier.',

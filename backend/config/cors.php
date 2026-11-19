@@ -6,7 +6,8 @@ return [
     'allowed_methods' => ['GET', 'POST', 'OPTIONS'],
     'allowed_origins' => array_filter([env('FRONTEND_URL', 'http://localhost:3000')]),
     'allowed_origins_patterns' => [],
-    'allowed_headers' => ['Accept', 'Content-Type', 'X-Requested-With', 'Accept-Language'],
+    // Authorization : nécessaire pour le jeton du compte citoyen (en-tête Bearer).
+    'allowed_headers' => ['Accept', 'Authorization', 'Content-Type', 'X-Requested-With', 'Accept-Language'],
     'exposed_headers' => [],
     'max_age' => 600,
     'supports_credentials' => false,

@@ -29,9 +29,9 @@ class ConsulateStatsWidget extends StatsOverviewWidget
 
         return [
             Stat::make("Rendez-vous aujourd'hui", $today)->icon('heroicon-o-calendar')->color('primary'),
-            Stat::make('Rendez-vous à venir', $upcoming)->description("dont {$pending} en attente de confirmation")
+            Stat::make(__('Rendez-vous à venir'), $upcoming)->description("dont {$pending} en attente de confirmation")
                 ->icon('heroicon-o-calendar-days')->color('warning'),
-            Stat::make('Messages non lus', $unread)->icon('heroicon-o-envelope')->color($unread ? 'danger' : 'success'),
+            Stat::make(__('Messages non lus'), $unread)->icon('heroicon-o-envelope')->color($unread ? 'danger' : 'success'),
         ];
     }
 }

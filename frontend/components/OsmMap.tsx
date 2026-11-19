@@ -17,8 +17,7 @@ export default function OsmMap({ consulate, lang }: { consulate: Consulate; lang
       <p className="p-3 text-xs text-slate-500">
         <a className="underline" target="_blank" rel="noopener noreferrer" href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`}>
           {t(lang, 'open_map')}
-        </a>{' '}
-        — {t(lang, 'map_note')}
+        </a>
       </p>
     </div>
   );

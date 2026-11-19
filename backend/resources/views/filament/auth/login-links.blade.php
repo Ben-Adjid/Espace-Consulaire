@@ -1,12 +1,17 @@
-<div class="mt-6 space-y-3 border-t border-gray-200 pt-4 text-sm dark:border-white/10">
-    <p class="text-gray-600 dark:text-gray-300">
-        Démo non officielle. Les comptes sont créés par le super administrateur (tous les consulats) ou par un administrateur de consulat (son équipe).
-        Il n’y a pas d’inscription publique.
-    </p>
-    <p>
-        <a href="{{ rtrim(config('app.frontend_url'), '/') }}" class="font-semibold text-primary-600 hover:underline">← Retour au site public</a>
-    </p>
-    <p class="text-xs text-gray-500">
-        Comptes de démo : superadmin@demo.test · admin.tchad@demo.test · admin.cameroun@demo.test (mot de passe dans le README).
+@php($site = rtrim((string) config('app.frontend_url'), '/'))
+<div class="mt-6 space-y-4 border-t border-gray-200 pt-5 text-sm">
+    <div class="flex items-start gap-3 rounded-xl bg-gray-50 p-3 text-gray-600">
+        <x-filament::icon icon="heroicon-o-information-circle" class="mt-0.5 h-5 w-5 shrink-0 text-primary-600" />
+        <p>{{ __('Les comptes sont créés par la plateforme (consuls) ou par le consul (agents). Il n’y a pas d’inscription publique.') }}</p>
+    </div>
+    <div class="flex items-start gap-3 rounded-xl border border-gray-200 p-3">
+        <x-filament::icon icon="heroicon-o-user" class="mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
+        <p class="text-gray-600">
+            {{ __('Vous êtes citoyen ?') }}
+            <a href="{{ $site }}/connexion" class="font-semibold text-primary-600 hover:underline">{{ __('Accéder à l’espace citoyen') }}</a>
+        </p>
+    </div>
+    <p class="text-center">
+        <a href="{{ $site }}" class="font-semibold text-gray-500 hover:text-primary-600 hover:underline">{{ __('← Retour au site public') }}</a>
     </p>
 </div>

@@ -3,7 +3,7 @@
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000/api/v1').replace(/\/$/, '');
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(public status: number, message: string, public body?: unknown) {
     super(message);
   }
 }
@@ -52,13 +52,15 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
 
   if (!res.ok) {
     let message = `Erreur ${res.status}`;
+    let body: unknown;
     try {
-      const json = await res.json();
+      body = await res.json();
+      const json = body as { message?: unknown };
       if (typeof json?.message === 'string') message = json.message;
     } catch {
       // Réponse non JSON : on garde le message générique.
     }
-    throw new ApiError(res.status, message);
+    throw new ApiError(res.status, message, body);
   }
 
   return (await res.json()) as T;

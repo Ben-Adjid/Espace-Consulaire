@@ -19,6 +19,8 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Les tests simulent des comptes sans double authentification : l'obligation est testée à part (AssociationGovernanceTest). -->
+        <env name="TWO_FACTOR_FOR_MANAGERS" value="false"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>

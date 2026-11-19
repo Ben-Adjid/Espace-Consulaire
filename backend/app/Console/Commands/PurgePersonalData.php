@@ -21,6 +21,12 @@ class PurgePersonalData extends Command
 
     public function handle(): int
     {
+        if (! \App\Support\EnvironmentGuard::allowsDestructive()) {
+            $this->error(\App\Support\EnvironmentGuard::refusalMessage());
+
+            return self::FAILURE;
+        }
+
         $days = (int) ($this->option('days') ?: config('booking.retention_days'));
         $cutoff = now()->subDays($days);
 

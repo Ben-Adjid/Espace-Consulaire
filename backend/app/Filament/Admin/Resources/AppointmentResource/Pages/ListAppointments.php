@@ -16,7 +16,7 @@ class ListAppointments extends ListRecords
     {
         return [
             Actions\Action::make('export')
-                ->label('Exporter en CSV')
+                ->label(__('Exporter en CSV'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('gray')
                 ->action(fn () => $this->exportCsv()),

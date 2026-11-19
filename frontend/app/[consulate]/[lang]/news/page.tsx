@@ -3,9 +3,13 @@ import { api } from '@/lib/api';
 import { baseOf, loadConsulate } from '@/lib/server';
 import { t } from '@/lib/i18n';
 import type { NewsItem, Paginated } from '@/lib/types';
+import { pageTitle } from '@/lib/pageTitles';
 export const instant = false;
 
-export const metadata = { title: 'Actualités' };
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  return { title: pageTitle(lang, 'Actualités') };
+}
 
 export default async function NewsPage({ params, searchParams }: { params: Promise<{ consulate: string; lang: string }>; searchParams: Promise<{ page?: string }> }) {
   const { consulate: slug, lang: rawLang } = await params;
